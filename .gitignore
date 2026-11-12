@@ -1,0 +1,29 @@
+/node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+.env
+.env.backup
+.phpunit.result.cache
+docker-compose.override.yml
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/.idea
+/.vscode
+
+# Marcas que o Windows grava em arquivos baixados (Alternate Data Streams)
+*:Zone.Identifier
+
+# Histórico de execuções (saída dos commands, com dados de alunos):
+# já ignorado por storage/app/.gitignore; repetido aqui por segurança.
+/storage/app/execucoes/
+
+# Iniciador do Windows: o .exe é gerado por windows/compilar.sh
+/windows/dist/
+
+# Arquivos temporários de teste
+/public/teste-*.html
+/public/t-*.html
