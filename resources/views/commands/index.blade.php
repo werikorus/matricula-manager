@@ -123,6 +123,7 @@
 
 @push('scripts')
     <script>window.PAINEL = @json($painel);</script>
+    <script src="{{ asset('js/console-terminal.js') }}?v={{ filemtime(public_path('js/console-terminal.js')) }}"></script>
     <script src="{{ asset('js/painel.js') }}?v={{ filemtime(public_path('js/painel.js')) }}"></script>
 @endpush
 @endif

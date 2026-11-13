@@ -32,7 +32,7 @@ class MatriculaArtisan
         $nome = array_shift($argumentos);
 
         $linha = array_merge(
-            [(string) config('painel.matricula.php'), 'artisan', $nome, '--no-interaction', '--no-ansi'],
+            [(string) config('painel.matricula.php'), 'artisan', $nome, '--no-interaction', '--ansi'],
             $argumentos
         );
 
@@ -245,6 +245,8 @@ class MatriculaArtisan
 
         // Xdebug desligado nos processos disparados pelo painel: sem isso cada
         // execução tenta conectar no depurador e suja a saída com o aviso.
-        return array_merge(array_fill_keys(array_unique($chaves), false), ['XDEBUG_MODE' => 'off']);
+        // COLUMNS: sem terminal o Symfony supõe 80 colunas e encolhe a barra de
+        // progresso quando a linha (barra + nome do item) passa disso.
+        return array_merge(array_fill_keys(array_unique($chaves), false), ['XDEBUG_MODE' => 'off', 'COLUMNS' => '160']);
     }
 }

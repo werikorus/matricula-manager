@@ -5,6 +5,7 @@
 
   const P = window.PAINEL;
   const $ = (seletor) => document.querySelector(seletor);
+  const terminal = window.ConsoleTerminal($('#console-saida'));
 
   const ROTULOS = {
     pendente: 'Na fila',
@@ -298,7 +299,7 @@
     estado.execucao = execucao;
     estado.offset = 0;
 
-    $('#console-saida').textContent = '';
+    terminal.limpar();
     desenharCabecalho();
     desenharHistorico();
 
@@ -322,7 +323,7 @@
 
     const saida = $('#console-saida');
     const noFim = saida.scrollHeight - saida.scrollTop - saida.clientHeight < 40;
-    if (resposta.saida) saida.append(resposta.saida);
+    if (resposta.saida) terminal.escrever(resposta.saida);
     if (noFim) saida.scrollTop = saida.scrollHeight;
 
     const terminou = estado.execucao.ativa && !resposta.execucao.ativa;
