@@ -16,7 +16,7 @@
     { "src": "/img/app/icone.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ],
   "shortcuts": [
-    { "name": "Consultar aluno", "url": "/alunos", "icons": [{ "src": "/img/app/icone-192.png", "sizes": "192x192" }] },
+    { "name": "Consultar matrícula", "url": "/alunos", "icons": [{ "src": "/img/app/icone-192.png", "sizes": "192x192" }] },
     { "name": "Commands", "url": "/commands", "icons": [{ "src": "/img/app/icone-192.png", "sizes": "192x192" }] },
     { "name": "PABs parados", "url": "/pabs", "icons": [{ "src": "/img/app/icone-192.png", "sizes": "192x192" }] },
     { "name": "Matrículas paradas", "url": "/matriculas", "icons": [{ "src": "/img/app/icone-192.png", "sizes": "192x192" }] },

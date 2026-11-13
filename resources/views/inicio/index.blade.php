@@ -40,7 +40,7 @@
 
 <form method="GET" action="{{ route('alunos') }}" class="busca-aluno" data-carregando="Procurando…" role="search">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-    <input type="search" name="q" placeholder="Consultar aluno: nome, CPF, RA ou código da solicitação" aria-label="Consultar aluno" autocomplete="off" spellcheck="false" maxlength="100" autofocus>
+    <input type="search" name="q" placeholder="Consultar matrícula: nome do aluno, CPF, RA ou código da solicitação" aria-label="Consultar matrícula" autocomplete="off" spellcheck="false" maxlength="100" autofocus>
     <button type="submit" class="botao botao-primario">Buscar</button>
 </form>
 

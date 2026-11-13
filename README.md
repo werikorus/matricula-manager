@@ -101,9 +101,9 @@ mais recentes), com filtro por situação, busca e a saída de cada uma no conso
 ao lado (ao vivo, se ainda estiver rodando). "Repetir" abre a tela de Commands
 com o mesmo command e os mesmos parâmetros, para conferir e executar.
 
-### Consultar aluno
+### Consultar matrícula
 
-O menu "Consultar aluno" busca solicitações de qualquer situação por nome
+O menu "Consultar matrícula" busca solicitações de qualquer situação por nome
 (partes, sem acento/maiúscula), CPF, RA (com ou sem zeros) ou código da
 solicitação. O lápis abre a tela de edição.
 

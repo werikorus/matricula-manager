@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('titulo', $termo !== '' ? 'Aluno: '.$termo : 'Consultar aluno')
+@section('titulo', $termo !== '' ? 'Matrícula: '.$termo : 'Consultar matrícula')
 
 @php
     $data = function ($valor, $formato = 'd/m/Y H:i') {
@@ -24,7 +24,7 @@
 
 @section('conteudo')
 <header class="topo">
-    <h1>Consultar aluno</h1>
+    <h1>Consultar matrícula</h1>
     <div class="topo-meio">
         <span class="ambiente" title="Consulta direta no banco do matrícula">
             <strong>{{ $ambiente }}</strong>
@@ -35,7 +35,7 @@
 
 <form method="GET" action="{{ route('alunos') }}" class="busca-aluno" data-carregando="Procurando…" role="search">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-    <input type="search" name="q" value="{{ $termo }}" placeholder="Nome do aluno, CPF, RA ou código da solicitação" aria-label="Buscar aluno"
+    <input type="search" name="q" value="{{ $termo }}" placeholder="Nome do aluno, CPF, RA ou código da solicitação" aria-label="Consultar matrícula"
            autocomplete="off" spellcheck="false" maxlength="100" @if ($termo === '') autofocus @endif>
     <button type="submit" class="botao botao-primario">Buscar</button>
 </form>
