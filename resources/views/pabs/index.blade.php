@@ -19,11 +19,12 @@
     <div class="topo-meio">
         <span class="ambiente" title="Consulta direta no banco do matrícula">
             <strong>{{ $ambiente }}</strong>
-            <code>anos letivos {{ implode(' e ', $anos) }}</code>
+            <code>tb_admissao</code>
         </span>
+        @include('components.filtro-ano', ['ano' => $ano])
     </div>
     <span class="historico-nota">Consultado às {{ $consultadoEm->format('H:i:s') }}</span>
-    <a class="botao" href="{{ route('pabs') }}" data-carregando="Consultando PABs parados…">Atualizar</a>
+    <a class="botao" href="{{ route('pabs', ['ano' => $ano]) }}" data-carregando="Consultando PABs parados…">Atualizar</a>
     @if (! $erro)
         @if ($emAndamento)
             <a class="botao botao-primario" href="{{ route('commands', ['comando' => \App\Http\Controllers\PabController::COMANDO]) }}">

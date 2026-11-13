@@ -6,6 +6,7 @@ use App\Models\Execucao;
 use App\Services\BancoDoMatricula;
 use App\Services\IpDaVpn;
 use App\Services\MatriculaArtisan;
+use App\Support\AnoLetivo;
 use App\Support\Erros;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,6 +23,7 @@ class MatriculaController extends Controller
 
     public function index(BancoDoMatricula $banco): View
     {
+        $ano = AnoLetivo::escolhido();
         $erro = null;
         $matriculas = [];
         $porProcesso = [];
@@ -31,7 +33,7 @@ class MatriculaController extends Controller
                 $m['erro_resumo'] = Erros::resumir((string) $m['ds_erro']);
 
                 return $m;
-            }, $banco->matriculasParadas());
+            }, $banco->matriculasParadas($ano));
             $porProcesso = $banco->pendentesDeIntegracaoPorProcesso();
         } catch (RuntimeException $e) {
             $erro = $e->getMessage();
@@ -42,11 +44,11 @@ class MatriculaController extends Controller
         return view('matriculas.index', [
             'matriculas' => $matriculas,
             'porProcesso' => $porProcesso,
-            'noLoteDoAno' => array_sum(array_column(array_filter($porProcesso, function ($p) {
-                return $p['ano'] >= self::anoMinimo();
+            'noLoteDoAno' => array_sum(array_column(array_filter($porProcesso, function ($p) use ($ano) {
+                return $p['ano'] >= $ano;
             }), 'total')),
-            'anoMinimo' => self::anoMinimo(),
-            'desde' => (string) config('painel.matriculas.desde'),
+            'ano' => $ano,
+            'desde' => AnoLetivo::inicioDasInclusoes($ano),
             'emAndamento' => Execucao::ativaDoComando(self::COMANDO_LOTE) ?: Execucao::ativaDoComando(self::COMANDO),
             'erro' => $erro,
             'ambiente' => config('painel.matricula.ambiente'),
@@ -62,6 +64,7 @@ class MatriculaController extends Controller
     {
         $dados = $request->validate([
             'filtro' => ['required', 'in:anoLetivo,processo'],
+            'ano' => ['nullable', 'integer', 'in:'.implode(',', AnoLetivo::opcoes())],
             'processo' => ['required_if:filtro,processo', 'nullable', 'integer', 'min:1'],
         ], [
             'filtro.required' => 'Escolha como filtrar: por ano letivo ou por processo.',
@@ -69,6 +72,7 @@ class MatriculaController extends Controller
             'processo.required_if' => 'Escolha o processo.',
             'processo.integer' => 'Código de processo inválido.',
             'processo.min' => 'Código de processo inválido.',
+            'ano.in' => 'Ano letivo inválido.',
         ]);
 
         try {
@@ -88,7 +92,7 @@ class MatriculaController extends Controller
             }
         }
 
-        $valor = $dados['filtro'] === 'processo' ? (string) $dados['processo'] : (string) self::anoMinimo();
+        $valor = $dados['filtro'] === 'processo' ? (string) $dados['processo'] : (string) AnoLetivo::escolhido($request);
 
         // Os nomes dos argumentos vêm da tela do matrícula: [tipoFiltro, valor].
         [$tipo, $alvo] = array_column($comando['argumentos'], 'nome') + [null, null];
@@ -156,10 +160,5 @@ class MatriculaController extends Controller
         $execucao->disparar();
 
         return redirect()->route('commands', ['comando' => self::COMANDO]);
-    }
-
-    private static function anoMinimo(): int
-    {
-        return (int) config('painel.matriculas.ano_minimo');
     }
 }

@@ -63,43 +63,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | PABs parados
-    |--------------------------------------------------------------------------
-    | Anos letivos considerados na lista de PABs parados (situação 3 sem
-    | boleto e sem contrato). PABs com erro (situação 11) entram sempre.
-    */
-    'pabs' => [
-        'anos_letivos' => array_values(array_filter(array_map(
-            'intval',
-            explode(',', (string) env('PAINEL_PABS_ANOS', '2026,2027'))
-        ))),
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Matrículas paradas
-    |--------------------------------------------------------------------------
-    | Solicitações aguardando integração (14) ou com erro de integração (16)
-    | a partir deste ano letivo e incluídas depois desta data.
-    */
-    'matriculas' => [
-        'ano_minimo' => (int) env('PAINEL_MATRICULAS_ANO_MINIMO', 2026),
-        'desde' => (string) env('PAINEL_MATRICULAS_DESDE', '2026-01-01 00:00:00'),
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Reservas de vaga paradas
-    |--------------------------------------------------------------------------
-    | Reservas com erro, travadas em processamento, sem boleto ou aguardando
-    | pagamento, a partir deste ano letivo.
-    */
-    'reservas' => [
-        'ano_minimo' => (int) env('PAINEL_RESERVAS_ANO_MINIMO', 2026),
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
     | IP gravado em nu_ip_alteracao
     |--------------------------------------------------------------------------
     | Vazio: o painel descobre o IP desta máquina na VPN (rota do Windows até

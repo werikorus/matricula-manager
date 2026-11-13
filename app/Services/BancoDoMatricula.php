@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\AnoLetivo;
 use Dotenv\Dotenv;
 use PDO;
 use RuntimeException;
@@ -26,22 +27,15 @@ class BancoDoMatricula
     private $pdo;
 
     /**
-     * PABs que não andaram: processados sem boleto e sem contrato (situação 3)
-     * ou com erro de integração (situação 11). A regra é a mesma da consulta
-     * usada pelo time no SSMS.
+     * PABs que não andaram, do ano letivo informado em diante: processados
+     * sem boleto e sem contrato (situação 3) ou com erro de integração (11).
+     * O ano vale para as duas situações (na consulta original do SSMS, pela
+     * precedência do AND sobre o OR, só valia para a 3).
      *
      * @return array<int, array>
      */
-    public function pabsParados(): array
+    public function pabsParados(int $anoMinimo): array
     {
-        $anos = (array) config('painel.pabs.anos_letivos');
-
-        if ($anos === []) {
-            throw new RuntimeException('Configure PAINEL_PABS_ANOS no .env do painel (ex.: 2026,2027).');
-        }
-
-        $marcadores = implode(', ', array_fill(0, count($anos), '?'));
-
         return $this->consultar(
             "SELECT
                 a.cd_admissao, a.cd_contrato, a.nu_ra, p.cd_coligada, p.cd_filial,
@@ -52,23 +46,25 @@ class BancoDoMatricula
             FROM tb_admissao a
             JOIN tb_processo_admissao p ON p.cd_processo_admissao = a.cd_processo_admissao
             LEFT JOIN tb_situacao_admissao s ON s.cd_situacao_admissao = a.cd_situacao
-            WHERE (p.nu_ano_letivo IN ({$marcadores})
-                    AND a.cd_situacao = 3
-                    AND a.cd_boleto IS NULL
-                    AND a.cd_contrato IS NULL)
-                OR a.cd_situacao = 11
+            WHERE p.nu_ano_letivo >= ?
+              AND (
+                    (a.cd_situacao = 3 AND a.cd_boleto IS NULL AND a.cd_contrato IS NULL)
+                    OR a.cd_situacao = 11
+              )
             ORDER BY a.dh_inclusao DESC",
-            array_map('intval', array_values($anos))
+            [$anoMinimo]
         );
     }
 
     /**
      * Matrículas (solicitações) aguardando integração com o RM (14) ou com
-     * erro de integração (16), a partir do ano letivo e da data configurados.
+     * erro de integração (16), do ano letivo informado em diante, incluídas a
+     * partir de 1º de janeiro desse ano, ou do atual se o ano for futuro
+     * (consulta original: ano letivo >= 2026 e inclusão após 01/01/2026).
      *
      * @return array<int, array>
      */
-    public function matriculasParadas(): array
+    public function matriculasParadas(int $anoMinimo): array
     {
         return $this->consultar(
             "SELECT
@@ -100,7 +96,7 @@ class BancoDoMatricula
               AND p.nu_ano_letivo >= ?
               AND s.dh_inclusao > ?
             ORDER BY p.dh_inclusao DESC, s.dh_inclusao DESC",
-            [(int) config('painel.matriculas.ano_minimo'), (string) config('painel.matriculas.desde')]
+            [$anoMinimo, AnoLetivo::inicioDasInclusoes($anoMinimo).'T00:00:00']
         );
     }
 
@@ -145,7 +141,7 @@ class BancoDoMatricula
      *
      * @return array<int, array>
      */
-    public function reservasParadas(): array
+    public function reservasParadas(int $anoMinimo): array
     {
         return $this->consultar(
             "SELECT
@@ -177,7 +173,7 @@ class BancoDoMatricula
             ORDER BY
                 CASE WHEN r.cd_situacao = 7 THEN 0 WHEN r.cd_situacao = 6 THEN 1 WHEN b.cd_reserva_vaga IS NULL THEN 2 ELSE 3 END,
                 r.dh_inclusao DESC",
-            [(int) config('painel.reservas.ano_minimo')]
+            [$anoMinimo]
         );
     }
 
@@ -359,6 +355,24 @@ class BancoDoMatricula
             'linhas' => array_slice($linhas, 0, self::LIMITE_BUSCA),
             'cortado' => count($linhas) > self::LIMITE_BUSCA,
         ];
+    }
+
+    /**
+     * Maior ano letivo entre os processos seletivos cadastrados (matrícula,
+     * admissão/PAB e reserva). Ex.: já existindo processos de 2027, devolve 2027.
+     */
+    public function ultimoAnoLetivo(): ?int
+    {
+        $linhas = $this->consultar(
+            'SELECT MAX(ano) AS ano FROM (
+                SELECT MAX(nu_ano_letivo) AS ano FROM tb_processo
+                UNION ALL SELECT MAX(nu_ano_letivo) FROM tb_processo_admissao
+                UNION ALL SELECT MAX(nu_ano_letivo) FROM tb_processo_reserva
+            ) x'
+        );
+        $ano = $linhas[0]['ano'] ?? null;
+
+        return $ano === null ? null : (int) $ano;
     }
 
     /**

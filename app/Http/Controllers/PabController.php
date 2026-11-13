@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Execucao;
 use App\Services\BancoDoMatricula;
+use App\Support\AnoLetivo;
 use App\Services\MatriculaArtisan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,11 +18,12 @@ class PabController extends Controller
 
     public function index(BancoDoMatricula $banco): View
     {
+        $ano = AnoLetivo::escolhido();
         $erro = null;
         $pabs = [];
 
         try {
-            $pabs = $banco->pabsParados();
+            $pabs = $banco->pabsParados($ano);
         } catch (RuntimeException $e) {
             $erro = $e->getMessage();
         }
@@ -35,7 +37,7 @@ class PabController extends Controller
             'anosDoCommand' => self::anosDoCommand(),
             'emAndamento' => $emAndamento,
             'erro' => $erro,
-            'anos' => (array) config('painel.pabs.anos_letivos'),
+            'ano' => $ano,
             'ambiente' => config('painel.matricula.ambiente'),
             'consultadoEm' => now(),
         ]);

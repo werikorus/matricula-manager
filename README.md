@@ -54,19 +54,26 @@ adicione-o lá. As fontes de log exibidas ficam em `config/painel.php`, chave `l
 Não usamos `php artisan list`: o boot do matrícula consulta o banco (menu no
 `AppServiceProvider`) e, sem acesso ao banco, a listagem travava.
 
+### Filtro de ano letivo
+
+PABs, Matrículas e Reservas paradas têm um select **Ano letivo a partir de**:
+do último ano com processo seletivo cadastrado no ambiente (ex.: 2027, lido de
+`tb_processo`, `tb_processo_admissao` e `tb_processo_reserva`) até 2 anos antes
+do atual. O ano atual vem selecionado (`?ano=2025` na URL). É "a partir de"
+para não esconder o ano seguinte. Em Matrículas, o corte de inclusão é 1º de
+janeiro do ano escolhido, ou do atual quando o ano é futuro.
+
 ### PABs parados
 
 O menu "PABs parados" consulta direto o banco do matrícula (credenciais
-`DB_*` lidas do `.env` de lá). Anos letivos: `PAINEL_PABS_ANOS=2026,2027` no
-`.env` do painel (padrão 2026,2027). O botão "Reprocessar" abre o
+`DB_*` lidas do `.env` de lá). O botão "Reprocessar" abre o
 `ProcessaAdmissaoRMCommand` com o código da admissão preenchido.
 
 ### Matrículas paradas
 
 O menu "Matrículas paradas" lista as solicitações aguardando integração (14)
 ou com erro de integração (16), com o resumo do `ds_erro` e atalhos para os
-erros mais comuns. Filtros: `PAINEL_MATRICULAS_ANO_MINIMO=2026` e
-`PAINEL_MATRICULAS_DESDE="2026-01-01 00:00:00"` no `.env` do painel.
+erros mais comuns (incluídas desde 1º de janeiro do ano escolhido).
 "Reprocessar" de uma linha primeiro atualiza a `tb_solicitacao` (situação 14,
 tentativas 0, `ds_erro` nulo; só se ainda estiver em 14/16) e depois roda o
 `integradorCommand` com a solicitação;
@@ -122,8 +129,7 @@ paradas também preenche os dois.
 
 ### Reservas paradas
 
-O menu "Reservas paradas" lista reservas de vaga (ano letivo >=
-`PAINEL_RESERVAS_ANO_MINIMO`, padrão 2026) em quatro etapas: com erro (7),
+O menu "Reservas paradas" lista reservas de vaga em quatro etapas: com erro (7),
 travada em processamento (6), sem boleto (3/5 sem `rl_reserva_vaga_boleto`) e
 aguardando pagamento (5 com boleto). "Reprocessar" de uma linha abre o
 `ProcessaReservaRMCommand` com a reserva; não aparece para as que aguardam

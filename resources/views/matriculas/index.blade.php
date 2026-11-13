@@ -26,11 +26,13 @@
     <div class="topo-meio">
         <span class="ambiente" title="Consulta direta no banco do matrícula">
             <strong>{{ $ambiente }}</strong>
-            <code>ano letivo ≥ {{ $anoMinimo }} · incluídas após {{ $data($desde, 'd/m/Y') }}</code>
+            <code>tb_solicitacao</code>
         </span>
+        @include('components.filtro-ano', ['ano' => $ano])
+        <span class="filtro-ano-nota" title="Mesma relação da consulta original: ano letivo a partir do escolhido, incluídas desde 1º de janeiro dele">incluídas desde {{ $data($desde, 'd/m/Y') }}</span>
     </div>
     <span class="historico-nota">Consultado às {{ $consultadoEm->format('H:i:s') }}</span>
-    <a class="botao" href="{{ route('matriculas') }}" data-carregando="Consultando matrículas paradas…">Atualizar</a>
+    <a class="botao" href="{{ route('matriculas', ['ano' => $ano]) }}" data-carregando="Consultando matrículas paradas…">Atualizar</a>
     @if (! $erro)
         @if ($emAndamento)
             <a class="botao botao-primario" href="{{ route('commands', ['comando' => $emAndamento->comando]) }}">
@@ -182,6 +184,7 @@
 <dialog id="confirmar-todos" aria-labelledby="confirmar-todos-titulo">
     <form method="POST" action="{{ route('matriculas.reprocessar-todos') }}" class="dialogo" data-carregando="Iniciando a integração em lote…" id="form-lote">
         @csrf
+        <input type="hidden" name="ano" value="{{ $ano }}">
         <h2 id="confirmar-todos-titulo">Reintegrar matrículas em {{ $ambiente }}?</h2>
         <p>Roda o integrador em lote do matrícula. Ele <strong>zera as tentativas</strong>, volta as com erro para "Aguardando integrar RM" e tenta integrar todas com o RM.</p>
 
@@ -190,7 +193,7 @@
             <label class="escolha">
                 <input type="radio" name="filtro" value="anoLetivo" checked>
                 <span>
-                    <strong>Todas do ano letivo {{ $anoMinimo }} em diante</strong>
+                    <strong>Todas do ano letivo {{ $ano }} em diante</strong>
                     <small>{{ $noLoteDoAno }} {{ $noLoteDoAno === 1 ? 'solicitação' : 'solicitações' }} na situação 14 ou 16</small>
                 </span>
             </label>
@@ -210,7 +213,7 @@
             </label>
         </fieldset>
 
-        <pre id="lote-linha" data-comando="php artisan {{ MatriculaController::COMANDO_LOTE }}" data-ano="{{ $anoMinimo }}">php artisan {{ MatriculaController::COMANDO_LOTE }} anoLetivo {{ $anoMinimo }}</pre>
+        <pre id="lote-linha" data-comando="php artisan {{ MatriculaController::COMANDO_LOTE }}" data-ano="{{ $ano }}">php artisan {{ MatriculaController::COMANDO_LOTE }} anoLetivo {{ $ano }}</pre>
         <p class="dialogo-nota" id="lote-nota">O command não filtra pela data de inclusão: pode pegar solicitações que não aparecem nesta lista.</p>
 
         <div class="dialogo-acoes">

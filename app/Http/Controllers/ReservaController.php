@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Execucao;
 use App\Services\BancoDoMatricula;
 use App\Services\MatriculaArtisan;
+use App\Support\AnoLetivo;
 use App\Support\Erros;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -31,6 +32,7 @@ class ReservaController extends Controller
 
     public function index(BancoDoMatricula $banco): View
     {
+        $ano = AnoLetivo::escolhido();
         $erro = null;
         $reservas = [];
         $contagem = ['integrar' => 0, 'pagamento' => 0];
@@ -40,7 +42,7 @@ class ReservaController extends Controller
                 $r['erro_resumo'] = Erros::resumir((string) $r['ds_erro']);
 
                 return $r;
-            }, $banco->reservasParadas());
+            }, $banco->reservasParadas($ano));
             $contagem = $banco->contagemDosCommandsDeReserva((int) date('Y'));
         } catch (RuntimeException $e) {
             $erro = $e->getMessage();
@@ -52,7 +54,7 @@ class ReservaController extends Controller
             'reservas' => $reservas,
             'contagem' => $contagem,
             'anosDoCommand' => self::anosDoCommand(),
-            'anoMinimo' => (int) config('painel.reservas.ano_minimo'),
+            'ano' => $ano,
             'emAndamento' => Execucao::ativaDoComando(self::COMANDO_INTEGRAR) ?: Execucao::ativaDoComando(self::COMANDO_PAGAMENTO),
             'erro' => $erro,
             'ambiente' => config('painel.matricula.ambiente'),

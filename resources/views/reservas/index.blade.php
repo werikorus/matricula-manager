@@ -21,11 +21,12 @@
     <div class="topo-meio">
         <span class="ambiente" title="Consulta direta no banco do matrícula">
             <strong>{{ $ambiente }}</strong>
-            <code>ano letivo ≥ {{ $anoMinimo }}</code>
+            <code>tb_reserva_vaga</code>
         </span>
+        @include('components.filtro-ano', ['ano' => $ano])
     </div>
     <span class="historico-nota">Consultado às {{ $consultadoEm->format('H:i:s') }}</span>
-    <a class="botao" href="{{ route('reservas') }}" data-carregando="Consultando reservas paradas…">Atualizar</a>
+    <a class="botao" href="{{ route('reservas', ['ano' => $ano]) }}" data-carregando="Consultando reservas paradas…">Atualizar</a>
     @if (! $erro)
         @if ($emAndamento)
             <a class="botao botao-primario" href="{{ route('commands', ['comando' => $emAndamento->comando]) }}">
