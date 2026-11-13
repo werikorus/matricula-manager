@@ -23,6 +23,11 @@ class Telas
                 'descricao' => 'Executar as rotinas do matrícula e acompanhar a saída e os logs.',
                 'icone' => '<path d="M5 8l5 4-5 4M13 16h6"/>',
             ],
+            'historico' => [
+                'rota' => 'historico', 'texto' => 'Histórico de commands', 'carregando' => 'Abrindo o histórico…',
+                'descricao' => 'Execuções feitas pelo painel, com a saída de cada uma.',
+                'icone' => '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>',
+            ],
             'alunos' => [
                 'rota' => 'alunos', 'texto' => 'Consultar aluno', 'carregando' => 'Abrindo a consulta…',
                 'descricao' => 'Buscar por nome, CPF, RA ou solicitação e editar a matrícula.',

@@ -94,6 +94,13 @@ recentemente, commands mais executados (do histórico) e buscas recentes. O uso
 fica em `storage/app/acessos/` (um JSON por usuário, fora do git). Telas novas
 entram no menu e nos atalhos por `app/Support/Telas.php`.
 
+### Histórico de commands
+
+O menu "Histórico de commands" lista as execuções feitas pelo painel (as 500
+mais recentes), com filtro por situação, busca e a saída de cada uma no console
+ao lado (ao vivo, se ainda estiver rodando). "Repetir" abre a tela de Commands
+com o mesmo command e os mesmos parâmetros, para conferir e executar.
+
 ### Consultar aluno
 
 O menu "Consultar aluno" busca solicitações de qualquer situação por nome

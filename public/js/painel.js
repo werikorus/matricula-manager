@@ -301,7 +301,6 @@
 
     terminal.limpar();
     desenharCabecalho();
-    desenharHistorico();
 
     estado.relogio = setInterval(() => {
       if (estado.execucao?.ativa) $('#console-tempo').textContent = duracao(estado.execucao);
@@ -349,7 +348,8 @@
     }
   }
 
-  // ── Histórico ───────────────────────────────────────────
+  // ── Execuções (para o ponto "em execução" na lista e retomar o acompanhamento) ──
+  // A tabela completa fica na tela "Histórico de commands".
 
   async function carregarHistorico() {
     try {
@@ -357,27 +357,7 @@
     } catch {
       return;
     }
-    desenharHistorico();
     desenharLista();
-  }
-
-  function desenharHistorico() {
-    const corpo = $('#historico-corpo');
-    $('#historico-vazio').hidden = estado.historico.length > 0;
-    $('#historico-tabela').hidden = estado.historico.length === 0;
-
-    corpo.replaceChildren(...estado.historico.map((execucao) =>
-      el('tr', {
-        tabindex: '0',
-        'aria-selected': String(estado.execucao?.id === execucao.id),
-        onclick: () => acompanhar(execucao),
-        onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); acompanhar(execucao); } },
-      },
-        el('td', {}, el('span', { class: `selo selo-${execucao.status}`, text: ROTULOS[execucao.status] || execucao.status })),
-        el('td', {}, el('code', { text: execucao.linha.replace(/^php artisan /, '') })),
-        el('td', { class: 'num', text: quando(execucao.iniciado_em || execucao.criado_em) }),
-        el('td', { class: 'num', text: execucao.ativa ? 'em andamento' : duracao(execucao) }),
-        el('td', { class: 'num', text: execucao.codigo_saida ?? '' }))));
   }
 
   // ── Logs do matrícula ───────────────────────────────────
@@ -460,8 +440,11 @@
 
     await carregarHistorico();
 
-    // Se já existe algo rodando (ex.: a janela foi fechada no meio), volta a acompanhar.
-    const emAndamento = estado.historico.find((e) => e.ativa);
+    // ?execucao=ID (vindo do histórico) abre essa execução; senão, se já existe
+    // algo rodando (ex.: a janela foi fechada no meio), volta a acompanhar.
+    const pedida = new URLSearchParams(window.location.search).get('execucao');
+    const escolhida = pedida && estado.historico.find((e) => String(e.id) === pedida);
+    const emAndamento = escolhida || estado.historico.find((e) => e.ativa);
     if (emAndamento) acompanhar(emAndamento);
 
     // Mantém o histórico em dia quando a janela volta ao foco.

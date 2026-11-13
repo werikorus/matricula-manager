@@ -58,6 +58,7 @@
                 <code class="console-linha" id="console-linha"></code>
                 <span class="console-tempo" id="console-tempo"></span>
                 <button type="button" class="botao botao-console" id="console-parar" hidden>Parar</button>
+                <a class="botao botao-console" href="{{ route('historico') }}" data-carregando="Abrindo o histórico…" title="Todas as execuções feitas pelo painel">Histórico</a>
             </header>
             <pre class="console-saida" id="console-saida" tabindex="0" data-vazio="Escolha um command à esquerda e execute: a saída aparece aqui, ao vivo."></pre>
         </section>
@@ -90,25 +91,6 @@
         </section>
     </div>
 </div>
-
-<section class="historico" aria-labelledby="historico-titulo">
-    <div class="historico-topo">
-        <h2 id="historico-titulo">Últimas execuções</h2>
-        <span class="historico-nota">Clique em uma linha para rever a saída.</span>
-    </div>
-    <div class="folha">
-        <p class="vazio" id="historico-vazio">Nada foi executado pelo painel ainda.</p>
-        <div class="tabela-rolagem" id="historico-tabela" hidden>
-            <table>
-                <thead>
-                    <tr><th>Situação</th><th>Command</th><th>Início</th><th>Duração</th><th>Código de saída</th></tr>
-                </thead>
-                <tbody id="historico-corpo"></tbody>
-            </table>
-        </div>
-    </div>
-</section>
-
 <dialog id="confirmar" aria-labelledby="confirmar-titulo">
     <form method="dialog" class="dialogo">
         <h2 id="confirmar-titulo">Executar em {{ $ambiente }}?</h2>

@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommandController;
 use App\Http\Controllers\ConfiguracoesController;
 use App\Http\Controllers\ExecucaoController;
+use App\Http\Controllers\HistoricoController;
 use App\Http\Controllers\InicioController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\MatriculaController;
@@ -24,6 +25,7 @@ Route::middleware([Autenticado::class, RegistrarAcesso::class])->group(function 
 
     Route::get('/commands', [CommandController::class, 'index'])->name('commands');
     Route::get('/logs', LogController::class)->name('logs');
+    Route::get('/historico', [HistoricoController::class, 'index'])->name('historico');
 
     Route::get('/configuracoes', [ConfiguracoesController::class, 'index'])->name('configuracoes');
     Route::post('/configuracoes/ambiente', [ConfiguracoesController::class, 'salvarAmbiente'])->name('configuracoes.ambiente');

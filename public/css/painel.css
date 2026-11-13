@@ -918,6 +918,36 @@ dialog:has(.dialogo-largo) { width: min(860px, calc(100vw - 32px)); }
   .inicio-colunas { grid-template-columns: minmax(0, 1fr); }
 }
 
+/* ── Histórico de commands ─────────────────────────────── */
+
+.historico-bancada {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(360px, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.historico-lista { min-width: 0; }
+.tabela-historico td { vertical-align: top; }
+.tabela-historico tbody tr { cursor: pointer; }
+.tabela-historico tbody tr[aria-selected="true"] { background: var(--acento-suave); box-shadow: inset 3px 0 0 var(--acento); }
+.historico-comando strong { display: block; font-size: 13.5px; }
+.historico-comando .ambiente-chave { margin-left: 6px; font-size: 10.5px; vertical-align: 1px; }
+.historico-comando code { display: block; max-width: 40ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--tinta-2); font-size: 12px; }
+.historico-usuario { display: block; color: var(--tinta-2); font-size: 12px; }
+.historico-quando span { display: block; color: var(--tinta-2); font-size: 12px; }
+.atalho[data-filtro="status:sucesso"] strong { color: var(--ok); }
+.atalho[data-filtro="status:interrompido"] strong { color: var(--aviso); }
+.atalho[data-filtro="status:executando"] strong { color: var(--acento); }
+.tabela-historico th, .tabela-historico td { padding-left: 12px; padding-right: 12px; }
+.historico-console { position: sticky; top: 16px; margin-top: 0; display: flex; flex-direction: column; height: calc(100vh - 32px); max-height: 860px; min-height: 420px; }
+.historico-console .console-saida { flex: 1; height: auto; min-height: 0; }
+.historico-acoes { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 14px 8px 20px; border-top: 1px solid var(--console-linha); background: var(--console-2); }
+
+@media (max-width: 1100px) {
+  .historico-bancada { grid-template-columns: minmax(0, 1fr); }
+  .historico-console { position: static; height: 60vh; }
+}
+
 /* ── Ambiente (Produção/Homologação) ───────────────────── */
 
 .marca-ambiente { display: flex; align-items: center; gap: 6px; }
