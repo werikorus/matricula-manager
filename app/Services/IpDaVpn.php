@@ -31,7 +31,7 @@ class IpDaVpn
             return $fixo;
         }
 
-        $guardado = Cache::get(self::CACHE);
+        $guardado = Cache::get($this->chaveCache());
 
         return is_array($guardado) ? $guardado['ip'] : null;
     }
@@ -44,7 +44,7 @@ class IpDaVpn
             return ['ip' => $fixo, 'interface' => 'PAINEL_IP_VPN (.env)'];
         }
 
-        return Cache::remember(self::CACHE, now()->addMinutes(10), function () {
+        return Cache::remember($this->chaveCache(), now()->addMinutes(10), function () {
             return $this->detectar();
         });
     }
@@ -79,6 +79,12 @@ class IpDaVpn
         }
 
         return ['ip' => $ip, 'interface' => $linhas[1] ?? null];
+    }
+
+    /** Um valor por ambiente: os bancos podem estar em redes diferentes. */
+    private function chaveCache(): string
+    {
+        return self::CACHE.'.'.config('painel.matricula.ambiente');
     }
 
     /** IP do servidor de banco do matrícula (DB_HOST do .env de lá). */

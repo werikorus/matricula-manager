@@ -30,6 +30,14 @@ class ExecutarCommand extends Command
             return 1;
         }
 
+        // Roda no ambiente gravado na execução (execuções antigas não têm: usam o atual).
+        if ($execucao->ambiente) {
+            app(\App\Services\Configuracoes::class)->aplicar($execucao->ambiente);
+        }
+        if ($execucao->caminho) {
+            config(['painel.matricula.caminho' => $execucao->caminho]);
+        }
+
         $execucao->atualizar([
             'status' => 'executando',
             'iniciado_em' => Execucao::agora(),

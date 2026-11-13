@@ -23,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        // Ambiente do matrícula escolhido em Configurações (Produção/Homologação).
+        $this->app->make(\App\Services\Configuracoes::class)->aplicar();
     }
 }

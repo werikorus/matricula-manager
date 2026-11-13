@@ -20,6 +20,25 @@ return [
     ],
 
     /*
+    | Ambientes que podem ser escolhidos em Configurações. O escolhido
+    | substitui a chave "matricula" acima em cada requisição (veja
+    | App\Services\Configuracoes). O banco de cada um vem do .env da pasta.
+    | Os caminhos abaixo são o padrão: a tela de Configurações pode trocá-los.
+    */
+    'ambientes' => [
+        'PRD' => [
+            'titulo' => 'Produção',
+            'caminho' => env('MATRICULA_PATH_PRD', env('MATRICULA_PATH', '/home/werik/development/PRD/matricula')),
+            'php' => env('MATRICULA_PHP', 'php'),
+        ],
+        'HML' => [
+            'titulo' => 'Homologação',
+            'caminho' => env('MATRICULA_PATH_HML', '/home/werik/development/matricula'),
+            'php' => env('MATRICULA_PHP', 'php'),
+        ],
+    ],
+
+    /*
     |--------------------------------------------------------------------------
     | Commands
     |--------------------------------------------------------------------------

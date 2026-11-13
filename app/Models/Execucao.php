@@ -18,6 +18,8 @@ namespace App\Models;
  * @property-read int|null $pid
  * @property-read int|null $pid_executor
  * @property-read string $usuario
+ * @property-read string|null $ambiente
+ * @property-read string|null $caminho
  * @property-read string $criado_em
  * @property-read string|null $iniciado_em
  * @property-read string|null $finalizado_em
@@ -74,6 +76,9 @@ class Execucao
             'id' => $id,
             'comando' => $comando,
             'argumentos' => array_values($argumentos),
+            // Onde rodar: fixado na criação, para uma troca de ambiente depois não mudar o destino.
+            'ambiente' => (string) config('painel.matricula.ambiente'),
+            'caminho' => (string) config('painel.matricula.caminho'),
             'status' => 'pendente',
             'codigo_saida' => null,
             'pid' => null,
@@ -222,6 +227,7 @@ class Execucao
             'ativa' => $this->ativa(),
             'codigo_saida' => $this->codigo_saida,
             'usuario' => $this->usuario,
+            'ambiente' => $this->ambiente,
             'criado_em' => $this->criado_em,
             'iniciado_em' => $this->iniciado_em,
             'finalizado_em' => $this->finalizado_em,

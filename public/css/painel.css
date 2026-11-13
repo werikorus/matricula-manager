@@ -18,6 +18,8 @@
   --aviso: #a8500c;
   --aviso-suave: #fdf0e1;
   --sombra: rgb(14 20 48 / .45);
+  --hml: #0f7b6c;
+  --hml-suave: #dcf3ee;
   --veu: rgb(14 20 48 / .55);
 
   /* Console (saída, logs, login): bloco escuro nos dois temas. */
@@ -58,6 +60,8 @@
     --aviso: #ffb86c;          /* Orange */
     --aviso-suave: #3d3536;
     --sombra: rgb(0 0 0 / .55);
+    --hml: #8be9fd;            /* Cyan: homologação */
+    --hml-suave: #233b47;
     --veu: rgb(25 26 33 / .7);
 
     --console: #191a21;        /* borda/fundo mais escuro do Dracula */
@@ -91,6 +95,8 @@
     --aviso: #ffb86c;          /* Orange */
     --aviso-suave: #3d3536;
     --sombra: rgb(0 0 0 / .55);
+    --hml: #8be9fd;            /* Cyan: homologação */
+    --hml-suave: #233b47;
     --veu: rgb(25 26 33 / .7);
 
     --console: #191a21;        /* borda/fundo mais escuro do Dracula */
@@ -911,6 +917,70 @@ dialog:has(.dialogo-largo) { width: min(860px, calc(100vw - 32px)); }
 @media (max-width: 760px) {
   .inicio-colunas { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ── Ambiente (Produção/Homologação) ───────────────────── */
+
+.marca-ambiente { display: flex; align-items: center; gap: 6px; }
+.ambiente-ponto { width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--aviso); }
+:root[data-ambiente="HML"] .ambiente-ponto { background: var(--hml); }
+:root[data-ambiente="HML"] .marca-ambiente { color: var(--hml); font-weight: 600; }
+:root[data-ambiente="HML"] .marca-selo { box-shadow: 0 0 0 2px var(--hml); }
+/* Faixa no topo da janela: impossível confundir homologação com produção. */
+:root[data-ambiente="HML"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  height: 3px;
+  background: var(--hml);
+  pointer-events: none;
+}
+:root[data-ambiente="HML"] .ambiente { background: var(--hml-suave); color: var(--hml); }
+:root[data-ambiente="HML"] .ambiente strong { background: var(--hml); color: var(--superficie); }
+
+/* ── Configurações ─────────────────────────────────────── */
+
+.config-secao { padding: 18px 20px 20px; }
+.config-cabeca { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 20px; margin-bottom: 16px; }
+.config-cabeca h2 { font-size: 17px; font-weight: 700; }
+.config-cabeca p { margin-top: 4px; color: var(--tinta-2); max-width: 75ch; }
+.config-ambientes { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 14px; }
+.config-ambiente {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  cursor: pointer;
+}
+.config-ambiente:hover { border-color: var(--tinta-2); }
+.config-ambiente:has(input:checked) { border-color: var(--acento); box-shadow: inset 0 0 0 1px var(--acento); background: var(--acento-suave); }
+.config-ambiente:has(input:disabled) { opacity: .6; cursor: not-allowed; }
+.config-ambiente input { margin: 4px 0 0; accent-color: var(--acento); }
+.config-ambiente-corpo { display: grid; gap: 10px; min-width: 0; flex: 1; }
+.config-ambiente-titulo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 16px; }
+.ambiente-chave { padding: 1px 8px; border-radius: 999px; background: var(--aviso); color: var(--superficie); font: 700 12px/1.6 var(--mono); }
+.ambiente-chave-hml { background: var(--hml); }
+.config-em-uso { padding: 1px 8px; border-radius: 999px; background: var(--ok); color: var(--superficie); font-size: 11.5px; font-weight: 700; }
+.config-detalhes { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 12px; margin: 0; font-size: 13px; }
+.config-detalhes dt { color: var(--tinta-2); font-weight: 600; }
+.config-detalhes dd { margin: 0; min-width: 0; }
+.config-detalhes code { font-size: 12.5px; overflow-wrap: anywhere; }
+.config-detalhes small { display: block; color: var(--tinta-2); font: 400 11.5px/1.4 var(--mono); overflow-wrap: anywhere; }
+.config-verificacoes { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12.5px; }
+.config-secao + .config-secao { margin-top: 16px; }
+.aviso-na-secao { margin: 0 0 14px; padding: 10px 14px; }
+.aviso-na-secao p { color: var(--tinta); }
+#repositorios { scroll-margin-top: 16px; }
+.config-caminhos { display: grid; gap: 14px; }
+.config-caminho { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid transparent; border-radius: var(--raio-p); }
+.config-caminho label { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
+.config-caminho label small { color: var(--tinta-2); font-weight: 500; font-size: 12px; }
+.config-caminho .controle { max-width: 760px; }
+.config-caminho .campo-ajuda code { font-size: 12px; }
+.verificacao-ok { color: var(--ok); }
+.verificacao-falha { color: var(--falha); font-weight: 600; }
 
 /* ── Paginação das tabelas ──────────────────────────────── */
 

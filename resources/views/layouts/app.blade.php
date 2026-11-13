@@ -13,7 +13,9 @@
             <span class="marca-selo" aria-hidden="true">&gt;_</span>
             <div class="marca-textos">
                 <div class="marca-nome">Painel Matrícula</div>
-                <div class="marca-sub">Rotinas do dia</div>
+                <div class="marca-sub marca-ambiente" title="{{ config('painel.matricula.caminho') }}">
+                    <span class="ambiente-ponto" aria-hidden="true"></span>{{ config('painel.matricula.titulo', config('painel.matricula.ambiente')) }}
+                </div>
             </div>
         </div>
 
@@ -28,6 +30,11 @@
         </nav>
 
         <div class="lateral-rodape">
+            <a class="botao botao-discreto botao-lateral" href="{{ route('configuracoes') }}" data-carregando="Abrindo as configurações…"
+               data-dica="Configurações · ambiente {{ config('painel.matricula.ambiente') }}" @if (request()->routeIs('configuracoes')) aria-current="page" @endif>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+                <span class="menu-texto">Configurações</span>
+            </a>
             <button type="button" class="botao botao-discreto botao-lateral" data-alternar-menu aria-controls="lateral" aria-expanded="true" data-dica="Recolher menu (Ctrl+B)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path class="seta-menu" d="M15.5 10 13.5 12l2 2"/></svg>
                 <span class="menu-texto" data-menu-texto>Recolher menu</span>

@@ -74,6 +74,18 @@ tentativas 0, `ds_erro` nulo; só se ainda estiver em 14/16) e depois roda o
 `integradorLoteCommand processo <código>` (escolha no diálogo; o código do
 processo em cada linha abre o diálogo já com ele).
 
+### Configurações: ambiente
+
+Em Configurações (rodapé do menu) escolhe-se o matrícula usado pelo painel:
+**Produção** ou **Homologação**. A pasta de cada um é editada na mesma tela
+(aceita o caminho do Windows `\\wsl.localhost\Ubuntu\...` ou o da WSL; vazio
+volta ao padrão de `MATRICULA_PATH_PRD`/`MATRICULA_PATH_HML` no `.env`).
+Commands, logs, banco (do `.env` de cada pasta) e edição seguem a escolha,
+salva em `storage/app/configuracoes.json`. Cada execução guarda o ambiente em
+que rodou; a troca é bloqueada com rotina em execução. Em homologação o painel
+mostra uma faixa e o nome do ambiente em destaque. A tela testa se o banco de
+cada ambiente responde (VPN).
+
 ### Início
 
 Primeira tela do painel (`/`): busca rápida de aluno, atalhos para as telas

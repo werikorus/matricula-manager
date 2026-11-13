@@ -73,7 +73,7 @@ class EditorDeSolicitacao
      */
     public function colunas(): array
     {
-        return Cache::remember('painel.esquema.'.self::TABELA, now()->addMinutes(10), function () {
+        return Cache::remember('painel.esquema.'.config('painel.matricula.ambiente').'.'.self::TABELA, now()->addMinutes(10), function () {
             $sql = "SELECT c.name, t.name AS tipo, c.max_length, c.precision, c.scale,
                         c.is_nullable, c.is_identity, c.is_computed,
                         (SELECT TOP 1 OBJECT_NAME(fk.referenced_object_id) + '.' + COL_NAME(fk.referenced_object_id, fk.referenced_column_id)
@@ -120,7 +120,7 @@ class EditorDeSolicitacao
     /** @return array<string, string> código => descrição */
     public function situacoes(): array
     {
-        return Cache::remember('painel.situacoes_solicitacao', now()->addMinutes(10), function () {
+        return Cache::remember('painel.situacoes_solicitacao.'.config('painel.matricula.ambiente'), now()->addMinutes(10), function () {
             $linhas = $this->banco->pdo()->query('SELECT * FROM tb_situacao_solicitacao ORDER BY 1')->fetchAll(PDO::FETCH_NUM);
             $situacoes = [];
             foreach ($linhas as $linha) {
@@ -428,6 +428,7 @@ class EditorDeSolicitacao
         $registro = [
             'quando' => date(DATE_ATOM),
             'usuario' => $usuario,
+            'ambiente' => config('painel.matricula.ambiente'),
             'tabela' => self::TABELA,
             'chave' => $codigo,
             'alteracoes' => $diferencas,
