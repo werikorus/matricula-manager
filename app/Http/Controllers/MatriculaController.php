@@ -123,30 +123,30 @@ class MatriculaController extends Controller
         try {
             $comando = $matricula->comando(self::COMANDO);
         } catch (RuntimeException $e) {
-            return redirect()->route('matriculas')->with('erro', $e->getMessage());
+            return redirect($this->voltar($request))->with('erro', $e->getMessage());
         }
 
         if ($comando === null) {
-            return redirect()->route('matriculas')->with('erro', 'O '.self::COMANDO.' não está na tela "Dev > Commands" do matrícula.');
+            return redirect($this->voltar($request))->with('erro', 'O '.self::COMANDO.' não está na tela "Dev > Commands" do matrícula.');
         }
 
         Execucao::sincronizarOrfas();
         foreach ([self::COMANDO, self::COMANDO_LOTE] as $nome) {
             if (Execucao::existeAtivaDoComando($nome)) {
-                return redirect()->route('matriculas')->with('erro', "O {$nome} já está em execução. Espere terminar ou pare a execução atual. Nada foi alterado.");
+                return redirect($this->voltar($request))->with('erro', "O {$nome} já está em execução. Espere terminar ou pare a execução atual. Nada foi alterado.");
             }
         }
 
         $argumento = $comando['argumentos'][0]['nome'] ?? null;
         if ($argumento === null) {
-            return redirect()->route('matriculas')->with('erro', 'O '.self::COMANDO.' não tem mais o argumento do código da solicitação. Confira a tela "Dev > Commands" do matrícula.');
+            return redirect($this->voltar($request))->with('erro', 'O '.self::COMANDO.' não tem mais o argumento do código da solicitação. Confira a tela "Dev > Commands" do matrícula.');
         }
         $argumentos = $matricula->montarArgumentos($comando, [$argumento => (string) $codigo], []);
 
         try {
             $antes = $banco->prepararReintegracao($codigo, $ip->obter()['ip']);
         } catch (RuntimeException $e) {
-            return redirect()->route('matriculas')->with('erro', $e->getMessage());
+            return redirect($this->voltar($request))->with('erro', $e->getMessage());
         }
 
         $execucao = Execucao::criar(self::COMANDO, $argumentos, (string) $request->session()->get('usuario.email'));
@@ -160,5 +160,16 @@ class MatriculaController extends Controller
         $execucao->disparar();
 
         return redirect()->route('commands', ['comando' => self::COMANDO]);
+    }
+
+    /**
+     * Para onde voltar se o reprocessamento não começar: a tela de onde veio
+     * (ex.: Consultar matrícula), desde que seja do próprio painel.
+     */
+    private function voltar(Request $request): string
+    {
+        $voltar = (string) $request->input('voltar', '');
+
+        return preg_match('#^/(?!/)[a-z0-9/_-]*(\?[^\s]*)?$#i', $voltar) ? $voltar : route('matriculas', [], false);
     }
 }

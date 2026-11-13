@@ -91,6 +91,6 @@ class SolicitacaoController extends Controller
     {
         $voltar = (string) request()->query('voltar', '');
 
-        return preg_match('#^/[a-z0-9/_-]*(\?[^\s]*)?$#i', $voltar) ? $voltar : route('matriculas', [], false);
+        return preg_match('#^/(?!/)[a-z0-9/_-]*(\?[^\s]*)?$#i', $voltar) ? $voltar : route('matriculas', [], false);
     }
 }

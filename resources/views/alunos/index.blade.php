@@ -40,6 +40,13 @@
     <button type="submit" class="botao botao-primario">Buscar</button>
 </form>
 
+@if (session('erro'))
+    <div class="aviso aviso-falha" role="alert">
+        <h2>Não foi possível reprocessar</h2>
+        <p>{{ session('erro') }}</p>
+    </div>
+@endif
+
 @if ($erro)
     <div class="aviso aviso-falha" role="alert">
         <h2>Não consegui buscar</h2>
@@ -53,7 +60,7 @@
             <li><strong>CPF</strong> do aluno, com ou sem pontuação.</li>
             <li><strong>RA</strong>, com ou sem os zeros à esquerda, ou o <strong>código da solicitação</strong>.</li>
         </ul>
-        <p>O resultado mostra todas as solicitações encontradas, de qualquer situação. O lápis abre a solicitação para ver e editar.</p>
+        <p>O resultado mostra todas as solicitações encontradas, de qualquer situação. O lápis abre a solicitação para ver e editar; as que estão aguardando integração ou com erro podem ser reprocessadas direto da lista.</p>
     </div>
 @else
     <div class="resumo" role="status">
@@ -84,6 +91,7 @@
                             <th class="num">Tentativas</th>
                             <th class="num">Incluída em</th>
                             <th class="num">Alterada em</th>
+                            <th><span class="sr">Ações</span></th>
                         </tr>
                     </thead>
                     <tbody id="tabela-corpo">
@@ -121,6 +129,22 @@
                                 <td class="num">{{ $l['tentativas'] === null ? '—' : $l['tentativas'] }}</td>
                                 <td class="num">{{ $data($l['dh_inclusao']) }}</td>
                                 <td class="num">{{ $data($l['dh_alteracao']) }}</td>
+                                <td class="num">
+                                    @if (! in_array((int) $l['status'], [14, 16], true))
+                                        <span class="botao botao-mini" aria-disabled="true"
+                                              title="Só dá para reprocessar solicitações aguardando integração (14) ou com erro na integração (16).">Reprocessar</span>
+                                    @elseif ($emAndamento)
+                                        <span class="botao botao-mini" aria-disabled="true"
+                                              title="Já há um integrador rodando ({{ $emAndamento->comando }}). Espere terminar.">Reprocessar</span>
+                                    @else
+                                        <button type="button" class="botao botao-mini"
+                                                data-reprocessar-solicitacao="{{ $l['cd_solicitacao'] }}"
+                                                data-aluno="{{ $l['nm_aluno'] ?: '—' }}"
+                                                data-situacao="{{ $l['status'] }} · {{ $situacoes[(string) $l['status']] ?? 'Situação desconhecida' }}"
+                                                data-tentativas="{{ $l['tentativas'] === null ? 'vazio' : $l['tentativas'] }}"
+                                                title="Volta a solicitação para 14, zera as tentativas, limpa o erro e roda o integradorCommand">Reprocessar</button>
+                                    @endif
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -130,6 +154,10 @@
             <nav class="paginacao" data-paginacao aria-label="Paginação (rodapé)" hidden></nav>
         @endif
     </div>
+@endif
+
+@if ($resultado !== null && count($linhas) > 0 && ! $emAndamento)
+    @include('components.reprocessar-solicitacao', ['ambiente' => $ambiente, 'voltar' => $voltar])
 @endif
 
 @push('scripts')

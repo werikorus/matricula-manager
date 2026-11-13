@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Execucao;
 use App\Services\Acessos;
 use App\Services\BancoDoMatricula;
 use App\Services\EditorDeSolicitacao;
@@ -35,12 +36,18 @@ class AlunoController extends Controller
             }
         }
 
+        if ($resultado !== null) {
+            Execucao::sincronizarOrfas();
+        }
+
         return view('alunos.index', [
             'termo' => $termo,
             'resultado' => $resultado,
             'situacoes' => $situacoes,
             'erro' => $erro,
             'ambiente' => config('painel.matricula.ambiente'),
+            'emAndamento' => $resultado === null ? null
+                : (Execucao::ativaDoComando(MatriculaController::COMANDO_LOTE) ?: Execucao::ativaDoComando(MatriculaController::COMANDO)),
         ]);
     }
 }
