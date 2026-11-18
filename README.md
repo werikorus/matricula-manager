@@ -56,12 +56,13 @@ Não usamos `php artisan list`: o boot do matrícula consulta o banco (menu no
 
 ### Filtro de ano letivo
 
-PABs, Matrículas e Reservas paradas têm um select **Ano letivo a partir de**:
-do último ano com processo seletivo cadastrado no ambiente (ex.: 2027, lido de
+PABs, Matrículas e Reservas paradas têm um select **Ano letivo**: do último
+ano com processo seletivo cadastrado no ambiente (ex.: 2027, lido de
 `tb_processo`, `tb_processo_admissao` e `tb_processo_reserva`) até 2 anos antes
-do atual. O ano atual vem selecionado (`?ano=2025` na URL). É "a partir de"
-para não esconder o ano seguinte. Em Matrículas, o corte de inclusão é 1º de
-janeiro do ano escolhido, ou do atual quando o ano é futuro.
+do atual. O ano atual vem selecionado (`?ano=2025` na URL) e a tela traz só os
+registros desse ano letivo. Em Matrículas, o corte de inclusão é 1º de janeiro
+do ano escolhido, ou do atual quando o ano é futuro. O lote do integrador
+(`integradorLoteCommand anoLetivo <ano>`) também pega só o ano escolhido.
 
 ### PABs parados
 
@@ -77,7 +78,7 @@ erros mais comuns (incluídas desde 1º de janeiro do ano escolhido).
 "Reprocessar" de uma linha primeiro atualiza a `tb_solicitacao` (situação 14,
 tentativas 0, `ds_erro` nulo; só se ainda estiver em 14/16) e depois roda o
 `integradorCommand` com a solicitação;
-"Reprocessar todos" roda `integradorLoteCommand anoLetivo <ano mínimo>` ou
+"Reprocessar todos" roda `integradorLoteCommand anoLetivo <ano escolhido>` ou
 `integradorLoteCommand processo <código>` (escolha no diálogo; o código do
 processo em cada linha abre o diálogo já com ele).
 

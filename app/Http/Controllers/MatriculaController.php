@@ -18,7 +18,7 @@ class MatriculaController extends Controller
     /** Reintegra uma solicitação pelo código. */
     public const COMANDO = 'integradorCommand';
 
-    /** Zera as tentativas e reintegra todas as 14/16 a partir de um ano letivo. */
+    /** Zera as tentativas e reintegra todas as 14/16 de um ano letivo ou de um processo. */
     public const COMANDO_LOTE = 'integradorLoteCommand';
 
     public function index(BancoDoMatricula $banco): View
@@ -45,7 +45,7 @@ class MatriculaController extends Controller
             'matriculas' => $matriculas,
             'porProcesso' => $porProcesso,
             'noLoteDoAno' => array_sum(array_column(array_filter($porProcesso, function ($p) use ($ano) {
-                return $p['ano'] >= $ano;
+                return $p['ano'] === $ano;
             }), 'total')),
             'ano' => $ano,
             'desde' => AnoLetivo::inicioDasInclusoes($ano),
@@ -57,8 +57,8 @@ class MatriculaController extends Controller
     }
 
     /**
-     * Roda o integrador em lote com um dos dois filtros dele: ano letivo
-     * mínimo (o configurado no painel) ou um processo específico.
+     * Roda o integrador em lote com um dos dois filtros dele: o ano letivo
+     * escolhido na tela (só esse ano) ou um processo específico.
      */
     public function reprocessarTodos(Request $request, MatriculaArtisan $matricula): RedirectResponse
     {

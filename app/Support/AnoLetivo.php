@@ -8,12 +8,10 @@ use Illuminate\Support\Facades\Cache;
 use Throwable;
 
 /**
- * Filtro "ano letivo a partir de" das telas de acompanhamento: do último ano
- * com processo seletivo cadastrado (ex.: 2027) até 2 anos antes do atual,
- * escolhido num select (?ano=2025), com o ano atual por padrão.
- *
- * "A partir de" (>=) e não "igual": o ano seguinte (rematrículas, reservas)
- * continua aparecendo quando o filtro está no ano atual.
+ * Filtro de ano letivo das telas de acompanhamento: do último ano com
+ * processo seletivo cadastrado (ex.: 2027) até 2 anos antes do atual,
+ * escolhido num select (?ano=2025), com o ano atual por padrão. As telas
+ * trazem só os registros do ano escolhido.
  */
 class AnoLetivo
 {

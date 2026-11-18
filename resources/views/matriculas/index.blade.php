@@ -29,7 +29,7 @@
             <code>tb_solicitacao</code>
         </span>
         @include('components.filtro-ano', ['ano' => $ano])
-        <span class="filtro-ano-nota" title="Mesma relação da consulta original: ano letivo a partir do escolhido, incluídas desde 1º de janeiro dele">incluídas desde {{ $data($desde, 'd/m/Y') }}</span>
+        <span class="filtro-ano-nota" title="Solicitações do ano letivo {{ $ano }} incluídas desde 1º de janeiro de {{ min($ano, (int) date('Y')) }} (as de um ano futuro são feitas no ano atual)">incluídas desde {{ $data($desde, 'd/m/Y') }}</span>
     </div>
     <span class="historico-nota">Consultado às {{ $consultadoEm->format('H:i:s') }}</span>
     <a class="botao" href="{{ route('matriculas', ['ano' => $ano]) }}" data-carregando="Consultando matrículas paradas…">Atualizar</a>
@@ -193,7 +193,7 @@
             <label class="escolha">
                 <input type="radio" name="filtro" value="anoLetivo" checked>
                 <span>
-                    <strong>Todas do ano letivo {{ $ano }} em diante</strong>
+                    <strong>Todas do ano letivo {{ $ano }}</strong>
                     <small>{{ $noLoteDoAno }} {{ $noLoteDoAno === 1 ? 'solicitação' : 'solicitações' }} na situação 14 ou 16</small>
                 </span>
             </label>

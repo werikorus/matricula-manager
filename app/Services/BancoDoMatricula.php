@@ -27,14 +27,14 @@ class BancoDoMatricula
     private $pdo;
 
     /**
-     * PABs que não andaram, do ano letivo informado em diante: processados
+     * PABs que não andaram, só do ano letivo informado: processados
      * sem boleto e sem contrato (situação 3) ou com erro de integração (11).
      * O ano vale para as duas situações (na consulta original do SSMS, pela
      * precedência do AND sobre o OR, só valia para a 3).
      *
      * @return array<int, array>
      */
-    public function pabsParados(int $anoMinimo): array
+    public function pabsParados(int $ano): array
     {
         return $this->consultar(
             "SELECT
@@ -46,25 +46,25 @@ class BancoDoMatricula
             FROM tb_admissao a
             JOIN tb_processo_admissao p ON p.cd_processo_admissao = a.cd_processo_admissao
             LEFT JOIN tb_situacao_admissao s ON s.cd_situacao_admissao = a.cd_situacao
-            WHERE p.nu_ano_letivo >= ?
+            WHERE p.nu_ano_letivo = ?
               AND (
                     (a.cd_situacao = 3 AND a.cd_boleto IS NULL AND a.cd_contrato IS NULL)
                     OR a.cd_situacao = 11
               )
             ORDER BY a.dh_inclusao DESC",
-            [$anoMinimo]
+            [$ano]
         );
     }
 
     /**
      * Matrículas (solicitações) aguardando integração com o RM (14) ou com
-     * erro de integração (16), do ano letivo informado em diante, incluídas a
-     * partir de 1º de janeiro desse ano, ou do atual se o ano for futuro
+     * erro de integração (16), só do ano letivo informado, incluídas a partir
+     * de 1º de janeiro desse ano, ou do atual se o ano for futuro
      * (consulta original: ano letivo >= 2026 e inclusão após 01/01/2026).
      *
      * @return array<int, array>
      */
-    public function matriculasParadas(int $anoMinimo): array
+    public function matriculasParadas(int $ano): array
     {
         return $this->consultar(
             "SELECT
@@ -93,10 +93,10 @@ class BancoDoMatricula
             JOIN tb_processo p ON p.cd_processo = s.cd_processo
             LEFT JOIN tb_pessoa pe ON pe.cd_pessoa = s.cd_aluno
             WHERE s.cd_situacao_solicitacao IN (14, 16)
-              AND p.nu_ano_letivo >= ?
+              AND p.nu_ano_letivo = ?
               AND s.dh_inclusao > ?
             ORDER BY p.dh_inclusao DESC, s.dh_inclusao DESC",
-            [$anoMinimo, AnoLetivo::inicioDasInclusoes($anoMinimo).'T00:00:00']
+            [$ano, AnoLetivo::inicioDasInclusoes($ano).'T00:00:00']
         );
     }
 
@@ -104,7 +104,7 @@ class BancoDoMatricula
      * Solicitações que o integradorLoteCommand pega, agrupadas por processo:
      * situação 14 ou 16, sem filtro de data (o command não tem). Serve para os
      * dois filtros dele: por processo é a linha do processo; por ano letivo é
-     * a soma dos processos com ano >= o informado.
+     * a soma dos processos daquele ano.
      *
      * @return array<int, array{cd_processo: int, processo: string, ano: int, total: int}>
      */
@@ -141,7 +141,7 @@ class BancoDoMatricula
      *
      * @return array<int, array>
      */
-    public function reservasParadas(int $anoMinimo): array
+    public function reservasParadas(int $ano): array
     {
         return $this->consultar(
             "SELECT
@@ -168,12 +168,12 @@ class BancoDoMatricula
             OUTER APPLY (
                 SELECT TOP 1 rb.cd_reserva_vaga FROM rl_reserva_vaga_boleto rb WHERE rb.cd_reserva_vaga = r.cd_reserva_vaga
             ) b
-            WHERE p.nu_ano_letivo >= ?
+            WHERE p.nu_ano_letivo = ?
               AND r.cd_situacao IN (3, 5, 6, 7)
             ORDER BY
                 CASE WHEN r.cd_situacao = 7 THEN 0 WHEN r.cd_situacao = 6 THEN 1 WHEN b.cd_reserva_vaga IS NULL THEN 2 ELSE 3 END,
                 r.dh_inclusao DESC",
-            [$anoMinimo]
+            [$ano]
         );
     }
 
