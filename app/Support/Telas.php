@@ -48,6 +48,11 @@ class Telas
                 'descricao' => 'Reservas com erro, sem boleto ou aguardando pagamento.',
                 'icone' => '<path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',
             ],
+            'graficos' => [
+                'rota' => 'graficos', 'texto' => 'Gráficos', 'carregando' => 'Consultando os reprocessamentos…',
+                'descricao' => 'O que aconteceu com os reprocessamentos e a evolução das paradas.',
+                'icone' => '<path d="M4 20V11M10 20V5M16 20v-6M21 20H3"/>',
+            ],
         ];
     }
 

@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommandController;
 use App\Http\Controllers\ConfiguracoesController;
 use App\Http\Controllers\ExecucaoController;
+use App\Http\Controllers\GraficoController;
 use App\Http\Controllers\HistoricoController;
 use App\Http\Controllers\InicioController;
 use App\Http\Controllers\LogController;
@@ -45,6 +46,8 @@ Route::middleware([Autenticado::class, RegistrarAcesso::class])->group(function 
 
     Route::get('/reservas', [ReservaController::class, 'index'])->name('reservas');
     Route::post('/reservas/processar', [ReservaController::class, 'processar'])->name('reservas.processar');
+
+    Route::get('/graficos', [GraficoController::class, 'index'])->name('graficos');
 
     Route::get('/execucoes', [ExecucaoController::class, 'index'])->name('execucoes.index');
     Route::post('/execucoes', [ExecucaoController::class, 'store'])->name('execucoes.store');

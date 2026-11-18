@@ -1256,3 +1256,74 @@ dialog::backdrop { background: var(--veu); }
   .entrada { grid-template-columns: minmax(0, 1fr); }
   .entrada-console { display: none; }
 }
+
+/* ── Gráficos ─────────────────────────────────────────────────────
+   Identidade por tipo (categórica) e resultado (status). As cores das
+   séries foram conferidas para daltonismo contra as duas superfícies;
+   o resultado usa amarelo entre verde e vermelho para separar os dois. */
+.graficos {
+  --s-matriculas: #2a78d6; --s-pabs: #eb6834; --s-reservas: #1baf7a;
+  --s-erro: #6250d6;
+  --st-resolvido: #0ca30c; --st-parado: #fab219; --st-voltou: #d03b3b;
+  --grade: color-mix(in srgb, var(--linha) 70%, transparent);
+  --eixo: var(--linha);
+}
+:root[data-tema="escuro"] .graficos { --s-matriculas: #3987e5; --s-pabs: #d95926; --s-reservas: #199e70; --s-erro: #9085e9; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) .graficos { --s-matriculas: #3987e5; --s-pabs: #d95926; --s-reservas: #199e70; --s-erro: #9085e9; }
+}
+
+.filtros-graficos { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin: 4px 0 18px; }
+.filtro-grafico { display: inline-flex; align-items: center; gap: 8px; }
+.filtro-grafico > span { color: var(--tinta-2); font-size: 13px; font-weight: 600; }
+.segmentos { display: inline-flex; padding: 3px; gap: 2px; border: 1px solid var(--linha); border-radius: 10px; background: var(--superficie); }
+.segmentos button { border: 0; background: none; color: var(--tinta-2); font: inherit; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 7px; cursor: pointer; }
+.segmentos button:hover { color: var(--tinta); }
+.segmentos button[aria-pressed="true"] { background: var(--acento-suave); color: var(--tinta); }
+
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 14px; }
+.kpi, .cartao-grafico { background: var(--superficie); border: 1px solid var(--linha); border-radius: 14px; }
+.kpi { padding: 16px 18px; }
+.kpi-rotulo { display: flex; align-items: center; gap: 8px; color: var(--tinta-2); font-size: 13px; font-weight: 600; }
+.kpi-valor { margin-top: 6px; font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; color: var(--tinta); }
+.kpi-valor small { margin-left: 6px; font-size: 15px; font-weight: 600; color: var(--tinta-2); }
+.kpi-nota { margin-top: 4px; font-size: 12.5px; color: var(--tinta-2); }
+.kpi-sobe { color: var(--ok); }
+.kpi-desce { color: var(--falha); }
+.graficos .chave { display: inline-block; width: 10px; height: 10px; border-radius: 3px; flex: none; }
+
+.grade-graficos { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 14px; }
+.cartao-grafico { min-width: 0; padding: 16px 18px 14px; }
+.cartao-grafico h2 { font-size: 15.5px; font-weight: 700; }
+.cartao-sub { margin-top: 2px; color: var(--tinta-2); font-size: 13px; }
+.graficos .legenda { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 12px 0 4px; font-size: 13px; color: var(--tinta-2); }
+.graficos .legenda span { display: inline-flex; align-items: center; gap: 6px; }
+.area-grafico { position: relative; margin-top: 6px; }
+.area-grafico svg { display: block; width: 100%; overflow: visible; }
+.area-grafico svg text { fill: var(--tinta-2); font-size: 11.5px; font-family: inherit; font-variant-numeric: tabular-nums; }
+.area-grafico svg .rotulo-forte { fill: var(--tinta); font-weight: 600; }
+.area-grafico svg .rotulo-texto { font-variant-numeric: normal; }
+.grafico-vazio { padding: 28px 8px; color: var(--tinta-2); font-size: 13.5px; text-align: center; }
+.cartao-grafico details { margin-top: 10px; font-size: 13px; color: var(--tinta-2); }
+.cartao-grafico details summary { cursor: pointer; font-weight: 600; }
+.cartao-grafico details table { width: 100%; margin-top: 8px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.cartao-grafico details th, .cartao-grafico details td { padding: 4px 8px; border-bottom: 1px solid var(--linha); text-align: right; }
+.cartao-grafico details th:first-child, .cartao-grafico details td:first-child { text-align: left; }
+
+.medidores { display: grid; gap: 16px; margin-top: 16px; }
+.medidor-topo { display: flex; justify-content: space-between; gap: 8px; font-size: 13.5px; }
+.medidor-topo strong { display: inline-flex; align-items: center; gap: 6px; color: var(--tinta); }
+.medidor-topo span { color: var(--tinta-2); font-variant-numeric: tabular-nums; }
+.medidor-trilho { height: 10px; margin-top: 6px; border-radius: 999px; overflow: hidden; }
+.medidor-trilho i { display: block; height: 100%; border-radius: 999px; }
+
+.dica-grafico { position: absolute; z-index: 5; min-width: 150px; padding: 8px 10px; border: 1px solid var(--linha); border-radius: 10px;
+  background: var(--superficie); box-shadow: 0 10px 28px -12px var(--sombra); color: var(--tinta); font-size: 12.5px; pointer-events: none; }
+.dica-grafico b { display: block; margin-bottom: 4px; }
+.dica-grafico div { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.dica-grafico div span { display: inline-flex; align-items: center; gap: 6px; color: var(--tinta-2); }
+.dica-grafico em { font-style: normal; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.graficos-nota { max-width: 900px; margin-top: 14px; color: var(--tinta-2); font-size: 12.5px; }
+
+@media (max-width: 1100px) { .grade-graficos { grid-template-columns: minmax(0, 1fr); } }
