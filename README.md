@@ -7,6 +7,36 @@ Windows em `http://localhost:8010`.
 Primeira tela: **Commands** — lista dos commands liberados, formulário com os
 argumentos e opções de cada um, saída ao vivo e histórico de execuções.
 
+## Telas
+
+> As imagens usam dados fictícios: nomes, RAs, códigos e processos não são
+> de alunos reais.
+
+**Início** — atalhos ordenados pelo uso, solicitações abertas e buscas recentes.
+
+![Tela Início](docs/imagens/inicio.png)
+
+**Commands** — catálogo do matrícula, formulário de parâmetros e saída ao vivo.
+
+![Tela Commands](docs/imagens/commands.png)
+
+**Matrículas paradas** — solicitações aguardando integração ou com erro no RM,
+com os erros mais comuns e o reprocessamento por linha ou em lote.
+
+![Tela Matrículas paradas](docs/imagens/matriculas.png)
+
+**PABs parados** — inscrições sem boleto/contrato ou com erro de integração.
+
+![Tela PABs parados](docs/imagens/pabs.png)
+
+**Consultar matrícula** — busca por nome, CPF, RA ou código da solicitação.
+
+![Tela Consultar matrícula](docs/imagens/alunos.png)
+
+**Histórico de commands** — execuções feitas pelo painel, com a saída de cada uma.
+
+![Tela Histórico de commands](docs/imagens/historico.png)
+
 ## Instalação
 
 Dentro da WSL, na pasta onde você extraiu o zip:
