@@ -111,6 +111,48 @@ class BancoFalso extends BancoDoMatricula
         return ['integrar' => 0, 'pagamento' => 0];
     }
 
+    public function solicitacoesDoLote(?int $ano, ?int $processo): array
+    {
+        return [482310 => 16, 482327 => 14, 482344 => 16];
+    }
+
+    /** Situação "atual" determinística pelo código: ~80% resolvidos, o resto parado ou com erro. */
+    public function situacaoAtual(string $tipo, array $codigos): array
+    {
+        $erros = array_values(array_filter(Dados::ERROS));
+        $atuais = [];
+        foreach ($codigos as $codigo) {
+            $sorte = crc32($tipo.$codigo) % 100;
+            $resultado = $sorte < 80 ? 'resolvido' : ($sorte < 91 ? 'parado' : 'voltou');
+            $erro = $erros[crc32((string) $codigo) % count($erros)];
+            switch ($tipo) {
+                case 'matriculas':
+                    $atuais[$codigo] = ['situacao' => ['resolvido' => 2, 'parado' => 14, 'voltou' => 16][$resultado], 'erro' => $resultado === 'voltou' ? $erro : null];
+                    break;
+                case 'pabs':
+                    $atuais[$codigo] = ['situacao' => ['resolvido' => 4, 'parado' => 3, 'voltou' => 11][$resultado], 'sem_boleto_contrato' => $resultado === 'parado'];
+                    break;
+                default:
+                    $atuais[$codigo] = ['situacao' => ['resolvido' => 8, 'parado' => 6, 'voltou' => 7][$resultado], 'erro' => $resultado === 'voltou' ? $erro : null, 'tem_boleto' => $resultado === 'resolvido'];
+            }
+        }
+
+        return $atuais;
+    }
+
+    /** Repete a última contagem do seed, para a foto de hoje continuar a linha. */
+    public function contagemDeParadas(int $anoMinimo): array
+    {
+        $fotos = json_decode((string) @file_get_contents(dirname(__FILE__).'/storage/app/paradas/PRD.json'), true) ?: [];
+        $ultima = $fotos ? end($fotos) : [];
+
+        return [
+            'matriculas' => (int) ($ultima['matriculas'] ?? 30),
+            'pabs' => (int) ($ultima['pabs'] ?? 12),
+            'reservas' => (int) ($ultima['reservas'] ?? 6),
+        ];
+    }
+
     public function prepararReintegracao(int $codigoSolicitacao, string $ipVpn): array
     {
         throw new RuntimeException('Demonstração: nada é alterado.');

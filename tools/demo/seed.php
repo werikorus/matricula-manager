@@ -54,4 +54,44 @@ foreach ([['ana clara', 3], ['031207', 1], ['Davi Lucas', 2]] as $i => [$t, $r])
 }
 @mkdir(__DIR__.'/storage/app/acessos', 0775, true);
 file_put_contents(__DIR__.'/storage/app/acessos/'.sha1('acesso-livre').'.json', json_encode($dados, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+// Reprocessamentos dos últimos 90 dias (tela Gráficos). O resultado de cada
+// um sai de Demo\BancoFalso::situacaoAtual, determinístico pelo código.
+mt_srand(42);
+$linhas = '';
+$codigoBase = ['matriculas' => 482000, 'pabs' => 65000, 'reservas' => 23000];
+$porDia = ['matriculas' => 3.2, 'pabs' => 1.1, 'reservas' => 0.7];
+for ($dia = 90; $dia >= 0; $dia--) {
+    foreach ($porDia as $tipo => $media) {
+        $quantos = (int) round($media * (0.3 + mt_rand(0, 140) / 100) * (date('N', strtotime("-{$dia} days")) >= 6 ? 0.3 : 1));
+        for ($i = 0; $i < $quantos; $i++) {
+            $linhas .= json_encode([
+                'quando' => date(DATE_ATOM, strtotime("-{$dia} days 09:00") + mt_rand(0, 8 * 3600)),
+                'tipo' => $tipo,
+                'codigo' => $codigoBase[$tipo] + mt_rand(0, 9999),
+                'situacao_antes' => ['matriculas' => 16, 'pabs' => 11, 'reservas' => 7][$tipo],
+                'execucao' => null,
+                'comando' => 'demo',
+                'origem' => 'linha',
+            ])."\n";
+        }
+    }
+}
+@mkdir(__DIR__.'/storage/app/reprocessamentos', 0775, true);
+file_put_contents(__DIR__.'/storage/app/reprocessamentos/PRD.jsonl', $linhas);
+
+// Paradas em aberto por dia, com alguns dias sem contagem (painel fechado).
+$fotos = [];
+$nivel = ['matriculas' => 58, 'pabs' => 19, 'reservas' => 11];
+for ($dia = 90; $dia >= 1; $dia--) {
+    foreach ($nivel as $tipo => $valor) {
+        $nivel[$tipo] = max(2, $valor + mt_rand(-30, 26) / 10 * ($tipo === 'matriculas' ? 1 : 0.4));
+    }
+    if (date('N', strtotime("-{$dia} days")) >= 6) {
+        continue;
+    }
+    $fotos[date('Y-m-d', strtotime("-{$dia} days"))] = array_map('intval', array_map('round', $nivel)) + ['em' => date(DATE_ATOM, strtotime("-{$dia} days 10:00"))];
+}
+@mkdir(__DIR__.'/storage/app/paradas', 0775, true);
+file_put_contents(__DIR__.'/storage/app/paradas/PRD.json', json_encode($fotos, JSON_PRETTY_PRINT));
+
 echo "ok\n";

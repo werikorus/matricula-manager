@@ -16,7 +16,7 @@ XDEBUG_MODE=off php "$painel/tools/demo/seed.php" >/dev/null
 
 capturar() {
     google-chrome --headless=new --no-sandbox --disable-gpu --hide-scrollbars \
-        --user-data-dir="$temp/perfil" --window-size=1600,1000 --virtual-time-budget=5000 \
+        --user-data-dir="$temp/perfil" --window-size=1600,"${3:-1000}" --virtual-time-budget=5000 \
         --screenshot="$temp/$1.png" "http://127.0.0.1:${porta}$2" >/dev/null 2>&1
     cp "$temp/$1.png" "$painel/docs/imagens/$1.png"
     echo "docs/imagens/$1.png"
@@ -28,5 +28,6 @@ capturar matriculas /matriculas
 capturar pabs /pabs
 capturar alunos '/alunos?q=ana+clara'
 capturar historico /historico
+capturar graficos /graficos 1250
 
 rm -rf "$temp"
