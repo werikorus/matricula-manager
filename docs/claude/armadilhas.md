@@ -24,6 +24,10 @@ na área correspondente.
 - **PHP 7.4 / Laravel 8**: sem sintaxe de PHP 8 (`match`, `?->`, argumentos
   nomeados, `str_contains`, `enum`, promoted properties). `??=` e arrow
   functions existem no 7.4, mas o estilo do código é `function () use (...)`.
+- **Bindings feitos fora dos providers são sobrescritos por eles.** O
+  `AppServiceProvider` registra `BancoDoMatricula` como singleton; quem troca
+  serviços no container (a demonstração) precisa fazê-lo depois de
+  `RegisterProviders` (`afterBootstrapping`), senão o real vence.
 - **Config não está em cache** (`bootstrap/cache/config.php` não existe) e
   não deve estar: `Configuracoes::aplicar()` sobrescreve config em runtime e
   `env()` é lido em `Configuracoes::ambiente()`.
@@ -51,6 +55,11 @@ na área correspondente.
   `arg.codigoReserva`. Se o nome mudar no catálogo do matrícula, o campo
   simplesmente não é preenchido. Os POSTs de Matrículas, ao contrário, leem os
   nomes do catálogo (`$comando['argumentos']`) — prefira esse padrão.
+- **`ProcessaAdmissaoRMCommand` e `ProcessaReservaRMCommand` sem código pegam
+  só `TOP 3` e `TOP 2`** (ordenados por situação e código). O diálogo
+  "Reprocessar todos" de PABs diz "devem entrar N dos M" com N = todos os que
+  cumprem a regra, o que superestima; e a tela Gráficos não registra essas
+  execuções (não há como saber quais registros entraram).
 - Os nomes dos commands (`MatriculaController::COMANDO`, `PabController::COMANDO`
   etc.) precisam existir no catálogo; senão a tela mostra erro "não está na
   tela Dev > Commands".

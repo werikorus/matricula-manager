@@ -71,6 +71,8 @@ app/Services/
   CatalogoDoMatricula.php            parser (token_get_all) da tela Dev > Commands do matrícula
   Configuracoes.php                  ambiente escolhido (PRD/HML) e caminhos → config('painel.matricula')
   Acessos.php                        contagem de uso por tela, buscas e solicitações recentes (tela Início)
+  Reprocessamentos.php               registra o que o painel reprocessou e classifica o resultado (Gráficos)
+  HistoricoDeParadas.php             foto diária da quantidade de paradas (Gráficos)
   IpDaVpn.php                        IP da VPN via PowerShell do Windows (gravado em nu_ip_alteracao)
   EntraId.php                        login Microsoft (OAuth + PKCE, cliente HTTP do Laravel)
 app/Models/Execucao.php              execução de command = storage/app/execucoes/{id}.json + {id}.log

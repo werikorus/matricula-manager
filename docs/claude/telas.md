@@ -18,6 +18,7 @@ login). O menu e os atalhos do Início vêm de `App\Support\Telas`.
 | Matrículas paradas | `GET /matriculas?ano=` | `MatriculaController` | `matriculas/index` | `tabela.js` | `matriculasParadas($ano)`, `pendentesDeIntegracaoPorProcesso()` | linha: `POST /matriculas/{codigo}/reprocessar` (**UPDATE** + `integradorCommand`); lote: `POST /matriculas/reprocessar-todos` → `integradorLoteCommand anoLetivo <ano>` ou `processo <cd>` |
 | Edição da solicitação | `GET/POST /solicitacoes/{codigo}?voltar=` | `SolicitacaoController` | `solicitacoes/editar` | `solicitacao.js` | `EditorDeSolicitacao::{agrupadas,situacoes,buscar}` | **UPDATE** genérico (`EditorDeSolicitacao::salvar`) |
 | Reservas paradas | `GET /reservas?ano=` | `ReservaController` | `reservas/index` | `tabela.js` | `reservasParadas($ano)`, `contagemDosCommandsDeReserva` | `POST /reservas/processar` (`acao=integrar` → `ProcessaReservaRMCommand`, `acao=pagamento` → `alteraStatusReservaPaga`); linha → Commands com o código |
+| Gráficos | `GET /graficos` | `GraficoController` | `graficos/index` | `graficos.js` | `Reprocessamentos::comResultado()` (registros + `situacaoAtual`), `HistoricoDeParadas` | foto do dia em `storage/app/paradas/` |
 | Configurações | `GET /configuracoes`, `POST /configuracoes/{ambiente,caminhos}` | `ConfiguracoesController` | `configuracoes/index` | — | `Configuracoes`, `.env` de cada pasta, teste TCP no banco, `git` da pasta | `configuracoes.json` |
 | Login | `GET /login`, `/auth/redirect`, `/auth/callback`, `POST /logout` | `AuthController` | `auth/login` | — | Entra ID | sessão |
 
@@ -45,6 +46,32 @@ ser atualizadas se ele mudar:
   anos atual/seguinte; `alteraStatusReservaPaga` pega situação 5 com ano >= atual.
 - `MatriculaController::index` `noLoteDoAno` — soma de `pendentesDeIntegracaoPorProcesso`
   do ano (o lote não filtra data de inclusão).
+
+### Gráficos
+
+- **O que entra**: `Reprocessamentos::registrar($execucao)` é chamado *antes* de
+  `disparar()` em `ExecucaoController::store` e nas duas ações de
+  `MatriculaController`. Grava em `storage/app/reprocessamentos/{AMBIENTE}.jsonl`:
+  commands com código (`integradorCommand`, `ProcessaAdmissaoRMCommand`,
+  `ProcessaReservaRMCommand`) e a lista do `integradorLoteCommand`
+  (`solicitacoesDoLote`, a mesma consulta do command). PAB/reserva **sem
+  código** não entram: o command pega só `TOP 3`/`TOP 2` da regra dele.
+  Registrar nunca lança (não pode impedir um reprocessamento).
+- **Resultado**: a tela lê os últimos 91 dias, fica com o último
+  reprocessamento de cada registro e consulta a situação **atual**
+  (`situacaoAtual`, blocos de 1.000). `Reprocessamentos::classificar`:
+  matrícula 5/16/19 = voltou, 14 = parado; PAB 11 = voltou, 3 sem boleto e
+  contrato = parado; reserva 7 = voltou, 6 ou 3/5 sem boleto = parado; o resto
+  = resolvido.
+- **Paradas em aberto**: `HistoricoDeParadas::registrar()` (no máximo a cada
+  30 min) roda `contagemDeParadas(ano atual)` ao abrir Gráficos, PABs,
+  Matrículas ou Reservas e guarda em `storage/app/paradas/{AMBIENTE}.json`.
+  Dia sem tela aberta = dia sem ponto.
+- **Front**: o controller manda só tipo, dia, resultado e resumo do erro (sem
+  código nem nome) em `window.GRAFICOS`; `graficos.js` aplica os filtros
+  (4/13 semanas, tipo) e desenha em SVG. Cores em `painel.css` › "Gráficos"
+  (validadas para daltonismo; o resultado usa verde/amarelo/vermelho com
+  legenda e tabela).
 
 ### Bloqueio de execução simultânea ("pares")
 

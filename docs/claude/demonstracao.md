@@ -24,19 +24,22 @@ Para rodar em segundo plano numa sessão do Claude Code, use `subir.sh` com
   `.env` nem `artisan`: nada consegue conectar no banco nem executar);
 - `useStoragePath(tools/demo/storage)` (gitignored) — execuções, acessos,
   cache e sessão isolados;
-- troca no container: `BancoDoMatricula` → `Demo\BancoFalso`,
+- troca no container, **depois** dos providers (`afterBootstrapping(RegisterProviders)`;
+  o `booted` confere e aborta se o banco real tiver vencido): `BancoDoMatricula` → `Demo\BancoFalso`,
   `MatriculaArtisan` → `Demo\ArtisanFalso`, `EditorDeSolicitacao` →
   `Demo\EditorFalso` (em `tools/demo/fakes.php`);
 - exibe o caminho do matrícula como `/home/usuario/development/matricula`.
 
-`tools/demo/seed.php` (chamado por `subir.sh`) recria 8 execuções fictícias
-(com saída) e o uso das telas para o Início.
+`tools/demo/seed.php` (chamado por `subir.sh` e `capturar.sh`) recria 8
+execuções fictícias (com saída), o uso das telas para o Início, 91 dias de
+reprocessamentos e de contagens de paradas para Gráficos. O resultado de cada
+reprocessamento sai de `BancoFalso::situacaoAtual`, determinístico pelo código.
 
 ## O que funciona e o que não
 
 | Tela | Na demo |
 |---|---|
-| Início, Commands, Histórico, PABs, Matrículas, Consultar matrícula (`?q=` qualquer) | dados fictícios |
+| Início, Commands, Histórico, PABs, Matrículas, Consultar matrícula (`?q=` qualquer), Gráficos | dados fictícios |
 | Reservas paradas | lista vazia (fake devolve `[]`) |
 | Edição da solicitação | mostra o erro "Demonstração: sem banco." |
 | Configurações | abre, com verificações falhando (pasta sem `artisan`/`.env`) |

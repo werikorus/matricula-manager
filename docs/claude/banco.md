@@ -73,6 +73,16 @@ Ambas: transação, `SELECT … WITH (UPDLOCK, ROWLOCK)`, confere o estado antes
 
 Qualquer escrita nova deve seguir esse padrão e ser combinada com o usuário.
 
+## Consultas da tela Gráficos
+
+- `solicitacoesDoLote($ano, $processo)` — a mesma seleção do
+  `integradorLoteCommand` (14/16 do ano **ou** do processo, sem data).
+- `situacaoAtual($tipo, $codigos)` — situação de agora de matrículas
+  (`ds_erro`), PABs (sem boleto e contrato?) ou reservas (`ds_erro`, tem
+  boleto?), em blocos de 1.000 códigos (limite de 2.100 parâmetros do SQL Server).
+- `contagemDeParadas($anoMinimo)` — três `COUNT(*)` com a definição de
+  "parada" de cada tela, do ano letivo informado em diante.
+
 ## Busca de aluno (`buscarSolicitacoesDoAluno`)
 
 - CPF (11 dígitos, com/sem pontuação) → compara `nu_cpf_aluno` sem pontuação.

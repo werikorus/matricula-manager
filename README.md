@@ -38,6 +38,11 @@ com os erros mais comuns e o reprocessamento por linha ou em lote.
 
 ![Tela Histórico de commands](docs/imagens/historico.png)
 
+**Gráficos** — o que aconteceu com os registros reprocessados (resolvidos, ainda
+parados, voltaram a dar erro), taxa por tipo e evolução das paradas.
+
+![Tela Gráficos](docs/imagens/graficos.png)
+
 ## Instalação
 
 Dentro da WSL:
@@ -176,6 +181,23 @@ pagamento, que já têm boleto. "Reprocessar todos" oferece
 `alteraStatusReservaPaga` (verifica pagamentos no RM) ou
 `ProcessaReservaRMCommand` sem código (no máximo 2 por execução).
 
+### Gráficos
+
+O menu "Gráficos" mostra o resultado dos reprocessamentos feitos pelo painel.
+O código de saída do command não basta (o integrador termina bem mesmo quando
+a solicitação volta para 16), então o painel guarda **quais registros mandou
+reprocessar** (`storage/app/reprocessamentos/`) e, ao abrir a tela, consulta a
+situação atual de cada um: resolvido (saiu da fila de erro), ainda parado ou
+voltou a dar erro. Entram as linhas de Matrículas, PABs e Reservas, o integrador
+em lote e os mesmos commands rodados com código pela tela Commands. O
+"Reprocessar todos" de PABs e de reservas não entra: sem código, esses commands
+pegam só os 3/2 primeiros da regra deles. Os dados começam a contar a partir
+desta versão.
+
+"Paradas em aberto" vem de uma contagem diária (`storage/app/paradas/`) feita
+quando Gráficos, PABs, Matrículas ou Reservas paradas são abertas. Dias sem
+nenhuma dessas telas abertas ficam sem ponto.
+
 ### 3. Login
 
 `VALIDA_LOGIN_POR_MICROSOFT=true` exige login Microsoft; qualquer outro valor
@@ -262,6 +284,8 @@ app/Services/MatriculaArtisan.php      catálogo e montagem segura dos argumento
 app/Services/CatalogoDoMatricula.php   leitura da tela "Dev > Commands" do matrícula
 app/Services/Configuracoes.php         ambiente escolhido e caminhos dos repositórios
 app/Services/Acessos.php               uso das telas (tela Início)
+app/Services/Reprocessamentos.php      o que o painel reprocessou e o resultado (Gráficos)
+app/Services/HistoricoDeParadas.php    contagem diária de paradas (Gráficos)
 app/Services/IpDaVpn.php               IP da VPN gravado em nu_ip_alteracao
 app/Services/EntraId.php               login Microsoft
 app/Console/Commands/ExecutarCommand   executor em segundo plano (painel:executar)

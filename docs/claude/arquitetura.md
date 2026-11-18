@@ -44,6 +44,7 @@ Tela (POST)                      ExecucaoController::store / XController::reproc
   │  Execucao::existeAtivaDoComando()         → recusa duplicata (409 / flash 'erro')
   │  Execucao::criar()                        → storage/app/execucoes/{id}.json, status "pendente"
   │                                             (id do arquivo "contador", com flock)
+  │  Reprocessamentos::registrar()            → guarda os registros que vão ser reprocessados (Gráficos)
   └─ Execucao::disparar()                     → nohup php artisan painel:executar {id} &
                                                  (processo destacado: sobrevive à requisição)
 ExecutarCommand (painel:executar)
@@ -74,10 +75,15 @@ Status possíveis: `pendente`, `executando`, `sucesso`, `falha`,
 | `acessos/{sha1(email)}.json` | uso por tela, buscas e solicitações recentes | `Acessos` (via `RegistrarAcesso` e telas) |
 | `configuracoes.json` | ambiente escolhido e caminhos editados | `Configuracoes` |
 | `auditoria/tb_solicitacao.log` | uma linha JSON por gravação na edição | `EditorDeSolicitacao::auditar` |
+| `reprocessamentos/{AMBIENTE}.jsonl` | registros mandados reprocessar (tipo, código, situação antes, execução) | `Reprocessamentos::registrar` |
+| `paradas/{AMBIENTE}.json` | contagem diária de paradas (Gráficos) | `HistoricoDeParadas::registrar` |
 
 Cache (driver `file`): último ano letivo (10 min, 1 min se sem banco), esquema
 da `tb_solicitacao` e situações (10 min), IP da VPN (10 min) — todos com o
 ambiente na chave.
+
+`BancoDoMatricula` é singleton (`AppServiceProvider::register`): uma conexão
+por requisição, mesmo quando a tela consulta por mais de um serviço.
 
 ## Login
 
