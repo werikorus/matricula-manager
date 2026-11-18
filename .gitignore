@@ -27,3 +27,6 @@ yarn-error.log
 # Arquivos temporários de teste
 /public/teste-*.html
 /public/t-*.html
+
+# Storage da instância de demonstração (tools/demo)
+/tools/demo/storage/
