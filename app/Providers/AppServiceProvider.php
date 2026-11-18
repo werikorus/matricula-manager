@@ -13,7 +13,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        // Uma conexão por requisição: telas que consultam por mais de um serviço
+        // (ex.: lista + HistoricoDeParadas) não abrem um segundo login no banco.
+        $this->app->singleton(\App\Services\BancoDoMatricula::class);
     }
 
     /**

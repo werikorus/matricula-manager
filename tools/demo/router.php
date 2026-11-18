@@ -42,16 +42,23 @@ require __DIR__.'/fakes.php';
 
 $app = require $painel.'/bootstrap/app.php';
 $app->useStoragePath(__DIR__.'/storage');
-$app->singleton(App\Services\BancoDoMatricula::class, function () {
-    return new Demo\BancoFalso;
+// Os fakes entram DEPOIS dos providers: o AppServiceProvider registra o
+// BancoDoMatricula real como singleton e, antes disso, sobrescreveria o fake.
+$app->afterBootstrapping(Illuminate\Foundation\Bootstrap\RegisterProviders::class, function ($app) {
+    $app->singleton(App\Services\BancoDoMatricula::class, function () {
+        return new Demo\BancoFalso;
+    });
+    $app->singleton(App\Services\MatriculaArtisan::class, function () {
+        return new Demo\ArtisanFalso;
+    });
+    $app->bind(App\Services\EditorDeSolicitacao::class, function ($app) {
+        return new Demo\EditorFalso($app->make(App\Services\BancoDoMatricula::class), $app->make(App\Services\IpDaVpn::class));
+    });
 });
-$app->singleton(App\Services\MatriculaArtisan::class, function () {
-    return new Demo\ArtisanFalso;
-});
-$app->bind(App\Services\EditorDeSolicitacao::class, function ($app) {
-    return new Demo\EditorFalso($app->make(App\Services\BancoDoMatricula::class), $app->make(App\Services\IpDaVpn::class));
-});
-$app->booted(function () {
+$app->booted(function () use ($app) {
+    if (! $app->make(App\Services\BancoDoMatricula::class) instanceof Demo\BancoFalso) {
+        throw new RuntimeException('Demonstração: o banco falso não foi aplicado. Nada foi consultado.');
+    }
     // Caminho exibido nas telas (o real é a pasta tools/demo/matricula).
     config(['painel.matricula.caminho' => Demo\ArtisanFalso::EXIBIDO]);
 });
