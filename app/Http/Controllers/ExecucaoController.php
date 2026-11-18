@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Execucao;
 use App\Services\MatriculaArtisan;
+use App\Services\Reprocessamentos;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use RuntimeException;
@@ -24,7 +25,7 @@ class ExecucaoController extends Controller
         ]);
     }
 
-    public function store(Request $request, MatriculaArtisan $matricula): JsonResponse
+    public function store(Request $request, MatriculaArtisan $matricula, Reprocessamentos $reprocessamentos): JsonResponse
     {
         $dados = $request->validate([
             'comando' => ['required', 'string', 'max:200'],
@@ -57,6 +58,8 @@ class ExecucaoController extends Controller
             (string) $request->session()->get('usuario.email')
         );
 
+        // Antes de disparar: guarda os registros que o command vai reprocessar (tela Gráficos).
+        $reprocessamentos->registrar($execucao);
         $execucao->disparar();
 
         return response()->json(['execucao' => $execucao->resumo()], 201);

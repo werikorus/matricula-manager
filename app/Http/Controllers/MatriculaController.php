@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Execucao;
 use App\Services\BancoDoMatricula;
+use App\Services\HistoricoDeParadas;
 use App\Services\IpDaVpn;
 use App\Services\MatriculaArtisan;
+use App\Services\Reprocessamentos;
 use App\Support\AnoLetivo;
 use App\Support\Erros;
 use Illuminate\Http\RedirectResponse;
@@ -21,7 +23,7 @@ class MatriculaController extends Controller
     /** Zera as tentativas e reintegra todas as 14/16 de um ano letivo ou de um processo. */
     public const COMANDO_LOTE = 'integradorLoteCommand';
 
-    public function index(BancoDoMatricula $banco): View
+    public function index(BancoDoMatricula $banco, HistoricoDeParadas $paradas): View
     {
         $ano = AnoLetivo::escolhido();
         $erro = null;
@@ -37,6 +39,10 @@ class MatriculaController extends Controller
             $porProcesso = $banco->pendentesDeIntegracaoPorProcesso();
         } catch (RuntimeException $e) {
             $erro = $e->getMessage();
+        }
+
+        if ($erro === null) {
+            $paradas->registrar(); // foto do dia para o gráfico "Paradas em aberto"
         }
 
         Execucao::sincronizarOrfas();
@@ -60,7 +66,7 @@ class MatriculaController extends Controller
      * Roda o integrador em lote com um dos dois filtros dele: o ano letivo
      * escolhido na tela (só esse ano) ou um processo específico.
      */
-    public function reprocessarTodos(Request $request, MatriculaArtisan $matricula): RedirectResponse
+    public function reprocessarTodos(Request $request, MatriculaArtisan $matricula, Reprocessamentos $reprocessamentos): RedirectResponse
     {
         $dados = $request->validate([
             'filtro' => ['required', 'in:anoLetivo,processo'],
@@ -103,6 +109,7 @@ class MatriculaController extends Controller
         $argumentos = $matricula->montarArgumentos($comando, [$tipo => $dados['filtro'], $alvo => $valor], []);
 
         $execucao = Execucao::criar(self::COMANDO_LOTE, $argumentos, (string) $request->session()->get('usuario.email'));
+        $reprocessamentos->registrar($execucao);
         $execucao->disparar();
 
         return redirect()->route('commands', ['comando' => self::COMANDO_LOTE]);
@@ -116,7 +123,7 @@ class MatriculaController extends Controller
      * Tudo o que pode falhar sem mexer em nada (command, execução em
      * andamento, argumento) é conferido antes do UPDATE.
      */
-    public function reprocessar(Request $request, string $codigo, BancoDoMatricula $banco, MatriculaArtisan $matricula, IpDaVpn $ip): RedirectResponse
+    public function reprocessar(Request $request, string $codigo, BancoDoMatricula $banco, MatriculaArtisan $matricula, IpDaVpn $ip, Reprocessamentos $reprocessamentos): RedirectResponse
     {
         $codigo = (int) $codigo;
 
@@ -157,6 +164,8 @@ class MatriculaController extends Controller
             $antes['tentativas'] === null ? 'vazio' : (string) $antes['tentativas'],
             $antes['tinha_erro'] ? ', ds_erro limpo' : ''
         ));
+        // A situação de antes vem do UPDATE: o registro já está em 14 agora.
+        $reprocessamentos->registrar($execucao, [$codigo => $antes['situacao']]);
         $execucao->disparar();
 
         return redirect()->route('commands', ['comando' => self::COMANDO]);

@@ -358,6 +358,109 @@ class BancoDoMatricula
     }
 
     /**
+     * Solicitações que o integradorLoteCommand vai pegar, com a situação de
+     * agora: a mesma consulta dele (SolicitacaoDAO::buscarSolicitacoesPendentesIntegracaoLote
+     * no matrícula), 14 ou 16 do ano letivo OU do processo, sem filtro de data.
+     *
+     * @return array<int, int> cd_solicitacao => situação
+     */
+    public function solicitacoesDoLote(?int $ano, ?int $processo): array
+    {
+        $filtro = $processo !== null ? 's.cd_processo = ?' : 'p.nu_ano_letivo = ?';
+        $linhas = $this->consultar(
+            "SELECT s.cd_solicitacao, s.cd_situacao_solicitacao AS situacao
+            FROM tb_solicitacao s
+            JOIN tb_processo p ON p.cd_processo = s.cd_processo
+            WHERE s.cd_situacao_solicitacao IN (14, 16) AND {$filtro}",
+            [$processo !== null ? $processo : $ano]
+        );
+
+        return array_map('intval', array_column($linhas, 'situacao', 'cd_solicitacao'));
+    }
+
+    /**
+     * Situação atual de registros reprocessados, para a tela Gráficos.
+     * Consulta em blocos de 1.000 códigos (o SQL Server aceita até 2.100 parâmetros).
+     *
+     * @param  string  $tipo  matriculas | pabs | reservas
+     * @param  int[]  $codigos
+     * @return array<int, array{situacao: int, erro?: string|null, sem_boleto_contrato?: bool, tem_boleto?: bool}>
+     */
+    public function situacaoAtual(string $tipo, array $codigos): array
+    {
+        $sql = [
+            'matriculas' => 'SELECT cd_solicitacao AS codigo, cd_situacao_solicitacao AS situacao, ds_erro AS erro
+                FROM tb_solicitacao WHERE cd_solicitacao IN (%s)',
+            'pabs' => 'SELECT cd_admissao AS codigo, cd_situacao AS situacao,
+                    CASE WHEN cd_boleto IS NULL AND cd_contrato IS NULL THEN 1 ELSE 0 END AS sem_boleto_contrato
+                FROM tb_admissao WHERE cd_admissao IN (%s)',
+            'reservas' => 'SELECT r.cd_reserva_vaga AS codigo, r.cd_situacao AS situacao, r.ds_erro AS erro,
+                    CASE WHEN EXISTS (SELECT 1 FROM rl_reserva_vaga_boleto rb WHERE rb.cd_reserva_vaga = r.cd_reserva_vaga) THEN 1 ELSE 0 END AS tem_boleto
+                FROM tb_reserva_vaga r WHERE r.cd_reserva_vaga IN (%s)',
+        ][$tipo] ?? null;
+
+        if ($sql === null) {
+            throw new RuntimeException("Tipo de registro desconhecido: {$tipo}.");
+        }
+
+        $atuais = [];
+        foreach (array_chunk(array_values(array_unique(array_map('intval', $codigos))), 1000) as $bloco) {
+            $linhas = $this->consultar(sprintf($sql, implode(', ', array_fill(0, count($bloco), '?'))), $bloco);
+            foreach ($linhas as $linha) {
+                $atual = ['situacao' => (int) $linha['situacao']];
+                if (array_key_exists('erro', $linha)) {
+                    $atual['erro'] = $linha['erro'];
+                }
+                if (array_key_exists('sem_boleto_contrato', $linha)) {
+                    $atual['sem_boleto_contrato'] = (bool) $linha['sem_boleto_contrato'];
+                }
+                if (array_key_exists('tem_boleto', $linha)) {
+                    $atual['tem_boleto'] = (bool) $linha['tem_boleto'];
+                }
+                $atuais[(int) $linha['codigo']] = $atual;
+            }
+        }
+
+        return $atuais;
+    }
+
+    /**
+     * Quantos registros estão parados agora, do ano letivo informado em
+     * diante (foto diária da tela Gráficos):
+     *  - matrículas: situação 14 ou 16;
+     *  - PABs: 3 sem boleto e sem contrato, ou 11;
+     *  - reservas: 6 ou 7, ou 3/5 sem boleto (as que aguardam pagamento não contam).
+     *
+     * @return array{matriculas: int, pabs: int, reservas: int}
+     */
+    public function contagemDeParadas(int $anoMinimo): array
+    {
+        $linhas = $this->consultar(
+            'SELECT
+                (SELECT COUNT(*) FROM tb_solicitacao s
+                    JOIN tb_processo p ON p.cd_processo = s.cd_processo
+                    WHERE s.cd_situacao_solicitacao IN (14, 16) AND p.nu_ano_letivo >= ?) AS matriculas,
+                (SELECT COUNT(*) FROM tb_admissao a
+                    JOIN tb_processo_admissao p ON p.cd_processo_admissao = a.cd_processo_admissao
+                    WHERE p.nu_ano_letivo >= ?
+                      AND ((a.cd_situacao = 3 AND a.cd_boleto IS NULL AND a.cd_contrato IS NULL) OR a.cd_situacao = 11)) AS pabs,
+                (SELECT COUNT(*) FROM tb_reserva_vaga r
+                    JOIN tb_processo_reserva p ON p.cd_processo_reserva = r.cd_processo_reserva
+                    WHERE p.nu_ano_letivo >= ?
+                      AND (r.cd_situacao IN (6, 7)
+                           OR (r.cd_situacao IN (3, 5) AND NOT EXISTS (
+                               SELECT 1 FROM rl_reserva_vaga_boleto rb WHERE rb.cd_reserva_vaga = r.cd_reserva_vaga)))) AS reservas',
+            [$anoMinimo, $anoMinimo, $anoMinimo]
+        );
+
+        return [
+            'matriculas' => (int) ($linhas[0]['matriculas'] ?? 0),
+            'pabs' => (int) ($linhas[0]['pabs'] ?? 0),
+            'reservas' => (int) ($linhas[0]['reservas'] ?? 0),
+        ];
+    }
+
+    /**
      * Maior ano letivo entre os processos seletivos cadastrados (matrícula,
      * admissão/PAB e reserva). Ex.: já existindo processos de 2027, devolve 2027.
      */

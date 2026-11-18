@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Execucao;
 use App\Services\BancoDoMatricula;
+use App\Services\HistoricoDeParadas;
 use App\Support\AnoLetivo;
 use App\Services\MatriculaArtisan;
 use Illuminate\Http\RedirectResponse;
@@ -16,7 +17,7 @@ class PabController extends Controller
     /** Command do matrícula que reprocessa um PAB pelo código da admissão. */
     public const COMANDO = 'ProcessaAdmissaoRMCommand';
 
-    public function index(BancoDoMatricula $banco): View
+    public function index(BancoDoMatricula $banco, HistoricoDeParadas $paradas): View
     {
         $ano = AnoLetivo::escolhido();
         $erro = null;
@@ -26,6 +27,10 @@ class PabController extends Controller
             $pabs = $banco->pabsParados($ano);
         } catch (RuntimeException $e) {
             $erro = $e->getMessage();
+        }
+
+        if ($erro === null) {
+            $paradas->registrar(); // foto do dia para o gráfico "Paradas em aberto"
         }
 
         Execucao::sincronizarOrfas();
