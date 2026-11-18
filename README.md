@@ -10,7 +10,8 @@ argumentos e opções de cada um, saída ao vivo e histórico de execuções.
 ## Telas
 
 > As imagens usam dados fictícios: nomes, RAs, códigos e processos não são
-> de alunos reais.
+> de alunos reais. Elas saem da instância de demonstração (`tools/demo`,
+> veja [docs/claude/demonstracao.md](docs/claude/demonstracao.md)).
 
 **Início** — atalhos ordenados pelo uso, solicitações abertas e buscas recentes.
 
@@ -39,18 +40,25 @@ com os erros mais comuns e o reprocessamento por linha ou em lote.
 
 ## Instalação
 
-Dentro da WSL, na pasta onde você extraiu o zip:
+Dentro da WSL:
 
 ```bash
-bash instalar.sh                      # cria ~/development/painel-matricula
-bash instalar.sh /outro/caminho       # ou escolha a pasta
+git clone git@github.com:werikorus/matricula-manager.git ~/development/painel-matricula
+cd ~/development/painel-matricula
+composer install
+cp .env.example .env
+php artisan key:generate
 ```
 
-O script roda `composer create-project laravel/laravel:^8.0`, copia a pasta
-`overlay/` por cima e ajusta o `.env`. Não há banco de dados nem migrations.
+Depois, no `.env`, aponte `MATRICULA_PATH_PRD` e `MATRICULA_PATH_HML` para as
+pastas do matrícula de cada ambiente (veja [Configuração](#configuração)).
+Não há banco de dados próprio nem migrations: o estado do painel fica em
+`storage/app/`. Para abrir pelo Windows, instale o iniciador
+([Uso](#uso)).
 
-Requisito: **PHP 7.4** (o mesmo do matrícula) e Composer. Nada mais precisa
-ser instalado na máquina.
+Requisitos: **PHP 7.4** (o mesmo do matrícula) com as extensões `pdo_sqlsrv`
+(banco do matrícula), `mbstring`, `tokenizer` e `posix`, e o Composer. Não
+há Node nem build de front-end.
 
 ## Configuração
 
@@ -245,12 +253,24 @@ cd ~/development/painel-matricula && XDEBUG_MODE=off php artisan serve --port=80
 ## Estrutura
 
 ```
-config/painel.php                      caminho do matrícula, commands liberados, Entra ID
+routes/web.php                         todas as rotas do painel
+config/painel.php                      ambientes PRD/HML, logs exibidos, login, IP da VPN
+app/Http/Controllers/                  um controller por tela, Execucao (API JSON), Log, Auth
+app/Services/BancoDoMatricula.php      consultas ao banco do matrícula (e o reprocessamento)
+app/Services/EditorDeSolicitacao.php   edição da tb_solicitacao, com auditoria
 app/Services/MatriculaArtisan.php      catálogo e montagem segura dos argumentos
+app/Services/CatalogoDoMatricula.php   leitura da tela "Dev > Commands" do matrícula
+app/Services/Configuracoes.php         ambiente escolhido e caminhos dos repositórios
+app/Services/Acessos.php               uso das telas (tela Início)
+app/Services/IpDaVpn.php               IP da VPN gravado em nu_ip_alteracao
 app/Services/EntraId.php               login Microsoft
-app/Console/Commands/ExecutarCommand   executor em segundo plano
-app/Http/Controllers/                  Auth, Command (tela), Execucao (API da tela)
+app/Console/Commands/ExecutarCommand   executor em segundo plano (painel:executar)
 app/Models/Execucao.php                histórico em arquivos JSON
-resources/views/                       layout, login, tela de commands
-public/css/painel.css, public/js/painel.js
+app/Support/                           Telas (menu), AnoLetivo (filtro), Erros (resumo do ds_erro)
+resources/views/                       uma pasta por tela, layouts e componentes
+public/css/painel.css, public/js/      CSS e JS escritos à mão, sem build
+windows/                               iniciador do Windows (C#) e scripts de instalação
+tools/demo/                            instância de demonstração com dados fictícios
+docs/                                  imagens do README e base de conhecimento (docs/claude)
+CLAUDE.md                              ponto de partida para o Claude Code
 ```
